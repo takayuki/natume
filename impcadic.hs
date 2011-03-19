@@ -47,12 +47,18 @@ atoi s =  foldl (\x y -> x * 10 + y) 0 ((map (\c -> ord c - ord '0')) s)
 cost :: Int -> Int -> String
 cost b n = if (b-n) < (0::Int) then (show (0::Int)) else (show (b-n))
 
+escape :: String -> String
+escape [] = []
+escape ('"':xs) = '\\' : '"' : (escape xs)
+escape ('\\':xs) = '\\' : '\\' : (escape xs)
+escape (x:xs) = x : (escape xs)
+
 ipa :: String -> String -> String -> Int -> Int -> String
 ipa yomi word hinsi base count =
   "(品詞 " ++ hinsi ++ ") " ++
-  "((見出し語 (\"" ++ word ++ "\" " ++ (cost base count) ++ "))" ++
-  " (読み " ++ (hira2kata yomi) ++ ")" ++ 
-  " (発音 " ++ (hira2kata yomi) ++ "))"
+  "((見出し語 (\"" ++ (escape word) ++ "\" " ++ (cost base count) ++ "))" ++
+  " (読み \"" ++ (escape (hira2kata yomi)) ++ "\")" ++ 
+  " (発音 \"" ++ (escape (hira2kata yomi)) ++ "\"))"
 
 parse1 :: String -> (String,Int) -> [String] -> [String]
 parse1 _    _            []     = []
@@ -202,8 +208,10 @@ parse1 yomi (hinsi,count) (x:xs) =
          "N2T30" -> []
          "N2T35" -> []
          "D2T16" -> []
+         "D2T30" -> []
          "D2T35" -> []
          "ND2KY" -> []
+         "N2KY"  -> []
          "D2KY"  -> []
          ('K':t:_) -> if isLower t
                       then [ipa yomi word "(助詞 格助詞 一般)" 3000 count]

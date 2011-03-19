@@ -17,7 +17,7 @@
  --  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  --}
 module Config (
-    version,ipadicdir,ipadics,cannadicdir,cannadics,
+    version,ipadicdir,ipadics,cannadics,
     pathsep,nadicdir,natumedir
   ) where
 
@@ -43,12 +43,9 @@ ipadics = ["Adj.dic","Adnominal.dic","Adverb.dic","Auxil.dic",
            "Postp-col.dic","Postp.dic","Prefix.dic","Suffix.dic",
            "Symbol.dic","Verb.dic"]
 
-cannadicdir :: String
-cannadicdir = "@srcdir@" ++ pathsep ++ "cannadic-0.95c"
-
 cannadics :: [String]
-cannadics = ["gcanna.ctd","gcannaf.ctd"]
-
+cannadics = ["gcanna.ctd","gcannaf.ctd","g_fname.ctd","gt_okuri.ctd","gtankan.ctd"]
+             
 nadicdir :: String
 nadicdir = prefix ++ pathsep ++ "share" ++ pathsep ++ "natume"
 

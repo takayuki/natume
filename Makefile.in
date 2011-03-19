@@ -34,7 +34,7 @@ GHC = @GHC@
 GHC_OPTS = -F -pgmF ./h98safe -O2 -Wall -fno-warn-unused-do-bind -funbox-strict-fields -XForeignFunctionInterface $(LDFLAGS) $(LIBS)
 INSTALL = @INSTALL@
 IPADIC = ./ipadic-2.7.0
-CANNADIC = ./cannadic-0.95c
+CANNADIC = ./alt-cannadic-110208
 
 .c.o:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $(srcdir)/$< 
