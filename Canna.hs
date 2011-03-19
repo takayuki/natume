@@ -292,7 +292,7 @@ service s 0x10 0 =
       do cont <- peekCInt cxt
          idx <- peekCInt aux0
          mode <- peekCInt aux1
-         final <- peekArray idx ((castPtr buf) :: Ptr Int)
+         final <- peekArray idx ((castPtr buf) :: Ptr CInt)
          let (_,pause) = cxts !! cont
          if (length cxts) <= cont
            then do poke aux0 (-1)
@@ -315,7 +315,7 @@ service s 0x10 0 =
                                 then dic_update (dics !! dic) pnt stl
                                 else return 0
                               return ())
-                    (zip final (map head pause))
+                    (zip (map (fromInteger . toInteger) final) (map head pause))
                 poke aux0 0
                 response srv
                 dispatch s
