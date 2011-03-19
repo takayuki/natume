@@ -1,82 +1,82 @@
-�ʤĤ� -- Haskell�ˤ�뤫�ʴ����Ѵ��μ��� (version 0.11)
+なつめ -- Haskellによるかな漢字変換の実装 (version 0.12)
 INSTALL
 
-�ܼ�
-1 ����ѥ����ɬ�פʴĶ�
+目次
+1 コンパイルに必要な環境
   1.1 GHC (The Glasgow Haskell Compiler)
   1.2 GCC & make
-  1.3 �ƥ���
-2 ����ѥ���
+  1.3 テスト
+2 コンパイル
   2.1 configure & make
   2.2 make install
-3 ��ư & ���
-  3.1 cannaserver����ߤ���
-  3.2 natumeserver��ư����
-  3.3 natumeserver����ߤ���
-4 �������ƥ�
-  4.1 �Ŀ;���
-  4.2 ������������
-  4.3 Cannaͳ�������
-5 ���饤�����
-  5.1 ư���ǧ����Ƥ��륯�饤�����
-  5.2 (���֤�)ư��ʤ����饤�����
-6 �桼��������
-  6.1 ����Υե����ޥå�
-  6.2 ����ι���
-  6.3 �ҥ��
+3 起動 & 停止
+  3.1 cannaserverを停止する
+  3.2 natumeserverを起動する
+  3.3 natumeserverを停止する
+4 セキュリティ
+  4.1 個人情報
+  4.2 アクセス制御
+  4.3 Canna由来の問題
+5 クライアント
+  5.1 動作が確認されているクライアント
+  5.2 (たぶん)動作しないクライアント
+6 ユーザー辞書
+  6.1 辞書のフォーマット
+  6.2 辞書の更新
+  6.3 ヒント
 
-���Х��ʥ�ѥå����������Ѥ�����
+※バイナリパッケージを利用する場合
 
-1��2�����Ф��Ƥ⤫�ޤ��ޤ���3�����ɤ�Ǥ���������
+1と2は飛ばしてもかまいません。3から読んでください。
 
 
-1. ����ѥ����ɬ�פʴĶ�
+1. コンパイルに必要な環境
 
-�ʤĤ�򥳥�ѥ��뤹�뤿��ˤϡ�
-���ʤ��δĶ��ˤĤ��Υ��եȥ���������������Ƥ���ɬ�פ�����ޤ���
+なつめをコンパイルするためには、
+あなたの環境につぎのソフトウェアが準備されている必要があります。
 
   1.1 GHC (The Glasgow Haskell Compiler)
 
     http://www.haskell.org/ghc/
     http://www.haskell.org/ghc/download.html
 
-    ���ϤȤ⤢�졢Haskell����ѥ��餬ɬ�פǤ���
-    (ư���ǧ�Ѥ�: GHC version 6.4, 6.4.1, 6.4.2, 6.6)
+    何はともあれ、Haskellコンパイラが必要です。
+    (動作確認済み: GHC version 7.0.2)
 
-    Haskell�θ�������ϤϤ����Ĥ�¸�ߤ��ޤ�����
-    GHC�ʳ��ν����ϤǤϡ�ư����ǧ���Ƥ��ޤ���
+    Haskellの言語処理系はいくつか存在しますが、
+    GHC以外の処理系では、動作を確認していません。
 
-    ��Υڡ����ˤϡ����ޤ��ޤʥץ�åȥۡ�����Ф��ơ�
-    �Х��ʥ�ѥå��������Ѱդ���Ƥ���Τǡ��Ǥ��������������Ѥ��ޤ��礦��
+    上のページには、さまざまなプラットホームに対して、
+    バイナリパッケージが用意されているので、できるだけそれを利用しましょう。
 
-    �⤷���ʤ������֤ʤ�Ǥ⥳��ѥ��뤷�Ƥ��פȤ��������λ�����Ǥ⡢
-    ��������ϡ��Х��ʥ�ѥå������Τ����äˤʤ�ޤ��礦��
+    もしあなたが、「なんでもコンパイルしてやる」という姿勢の持ち主でも、
+    今回だけは、バイナリパッケージのお世話になりましょう。
 
-    �ʤ��ʤ顢GHC���Τ�Τ⡢GHC�ǽ񤫤�Ƥ��뤫��Ǥ���
-    ��ȷܤδط��˴٤�ʤ�����ˡ�
-    �����ʤ��Ȥ�ǽ�����ϥХ��ʥ�ѥå�������Ȥ��ޤ��礦��
+    なぜなら、GHCそのものも、GHCで書かれているからです。
+    卵と鶏の関係に陥らないために、
+    すくなくとも最初だけはバイナリパッケージを使いましょう。
 
-    ��NetBSD�����ѼԤ�������
-      NetBSD��pkg��GHC���Ѱդ���Ƥ��ޤ���
+    ※NetBSDの利用者の方々ヘ
+      NetBSDのpkgにGHCが用意されています。
 
       ftp://ftp.netbsd.org/pub/NetBSD/packages/pkgsrc/lang/ghc/README.html
 
-      �錄���ϡ�NetBSD 2.0��pkg���饤�󥹥ȡ��뤷��ghc 6.4��
-      ���Ρ֤ʤĤ�פ�񤭤ޤ�����
+      わたしは、NetBSD 2.0とpkgからインストールしたghc 6.4で
+      この「なつめ」を書きました。
 
   1.2 GCC & make
 
-    �ۤȤ�ɤδĶ��˥��󥹥ȡ��뤵��Ƥ���Ȼפ��Τǡ�
-    �ܤ��������ϳ䰦���ޤ���make�ϡ�BSD�Ǥ�GNU�Ǥ�Ȥ��ޤ���
+    ほとんどの環境にインストールされていると思うので、
+    詳しい説明は割愛します。makeは、BSDでもGNUでも使えます。
 
-  1.3 �ƥ���
+  1.3 テスト
 
-    �⤷���Ϥ����Haskell��Ȥ��ΤǤ���С������Ǵ�ñ�ʥץ�������
-    ����ѥ��뤷�Ƥߤޤ��礦��Hello.hs�Ȥ����ե�����Τʤ��ˡ�
+    もし、はじめてHaskellを使うのであれば、ここで簡単なプログラムを
+    コンパイルしてみましょう。Hello.hsというファイルのなかに、
 
     main = putStrLn "Hello World"
 
-    ���ΰ�Ԥ�����񤤤Ƥ����ޤ���
+    この一行だけを書いておきます。
 
     $ cat Hello.hs 
     main = putStrLn "Hello World"
@@ -84,46 +84,46 @@ INSTALL
     $ ./hello 
     Hello World
 
-   ���Τ褦��ư�������ꤢ��ޤ���
+   このように動けば問題ありません。
 
-   (����)
+   (参考)
      Haskell
      http://www.haskell.org/
-     �ܲȡ�
+     本家。
 
      Wikipedia - Haskell
      http://ja.wikipedia.org/wiki/Haskell
-     ��ñ�������ʤ餳����
+     簡単な説明ならここ。
 
      Programming in Haskell
      http://www.sampou.org/cgi-bin/haskell.cgi
-     ���ܸ���ɤ������ʤ������ȡ�����ʸ�񤢤ꡣ
+     日本語で読める数少ないサイト。翻訳文書あり。
 
-2. ����ѥ���
+2. コンパイル
 
   2.1 configure & make
 
-    $ tar ztvf natume-0.1.tar.gz
-    $ cd natume-0.1
+    $ tar ztvf natume-0.12.tar.gz
+    $ cd natume-0.12
     $ ./configure
     $ make
 
-    5��10ʬ���餤�ԤĤ��⤷��ޤ��󡣤����Ǽ����������ޤ���
+    5〜10分くらい待つかもしれません。ここで辞書も作成します。
 
-    GHC�ϡ���®�˼¹Բ�ǽ�ʥХ��ʥ���������ޤ�����
-    ����ѥ��뤽�Τ�Τˤϡ������֤Τ����뷹��������ޤ���
+    GHCは、高速に実行可能なバイナリを生成しますが、
+    コンパイルそのものには、やや時間のかかる傾向があります。
 
   2.2 make install
 
-    # make install   ��������root�Ǻ�Ȥ��Ƥ���������
+    # make install   ←ここはrootで作業してください。
 
-    �ʲ��Υե����뤬���󥹥ȡ��뤵��ޤ���
+    以下のファイルがインストールされます。
 
-      /usr/local/bin/natume               �Хå������
-      /usr/local/bin/initnatume           �����������ץ�
-      /usr/local/bin/mknadic              ��������ġ���
-      /usr/local/libexec/natume/natume    �Хå������(����)
-      /usr/local/sbin/natumeserver        ������
+      /usr/local/bin/natume               バックエンド
+      /usr/local/bin/initnatume           初期化スクリプト
+      /usr/local/bin/mknadic              辞書作成ツール
+      /usr/local/libexec/natume/natume    バックエンド(本体)
+      /usr/local/sbin/natumeserver        サーバ
       /usr/local/share/natume/User.dic
       /usr/local/share/natume/connect.dat
       /usr/local/share/natume/connect.idx
@@ -138,235 +138,235 @@ INSTALL
       /usr/local/share/natume/user.sta
 
 
-3. ��ư & ���
+3. 起動 & 停止
 
-  3.1 cannaserver����ߤ���
+  3.1 cannaserverを停止する
 
-    ��cannaserver��natumeserver��Ʊ���˻��ѤǤ��ޤ���
-      �ޤ��Ϥ���ˡ�cannaserver����ߤ��Ƥ���������
+    ※cannaserverとnatumeserverは同時に使用できません。
+      まずはじめに、cannaserverを停止してください。
 
-    ��ߤ���ˡ�ϡ��Ķ��ˤ�äƤ��ޤ��ޤǤ���....
+    停止の方法は、環境によってさまざまですが....
     
     # /etc/rc.d/canna stop
     # /etc/rc.d/init.d/canna stop
     # cannakill
 
-    ���줫�顢cannaserver�λĤ����ǥ��쥯�ȥ�������Ƥ����ޤ���
+    それから、cannaserverの残したディレクトリを削除しておきます。
 
     # rm -rf /tmp/.iroha_unix
 
-  3.2 �����
+  3.2 初期化
 
-    natume�����Ѥ���桼�������Ȥ�initnatume��¹Ԥ��ơ��ۡ���ǥ��쥯�ȥ��
-    .natume�ǥ��쥯�ȥ��������ޤ���
+    natumeを利用するユーザーごとにinitnatumeを実行して、ホームディレクトリに
+    .natumeディレクトリを作成します。
 
     $ initnatume
 
-    ~/.natume�ǥ��쥯�ȥ�ˤϡ��桼�������񡢳ؽ�����ʤɤ���¸����ޤ���
+    ~/.natumeディレクトリには、ユーザー辞書、学習情報などが保存されます。
 
-    �äˡ�.natume/allow�ϡ�������������˴ؤ������ڤʥǥ��쥯�ȥ�Ǥ���
-    �ܤ����ϡ�4. �������ƥ��򻲾Ȥ��Ƥ���������
+    特に、.natume/allowは、アクセス制御に関する大切なディレクトリです。
+    詳しくは、4. セキュリティを参照してください。
 
     $ ls .natume/allow/
     127.0.0.1 unix
 
-    �����󥹥ȡ���������Ǥʤ����С�����󥢥å׻��ˤ⡢
-      initnatume��¹Ԥ���ɬ�פ�����ޤ���
+    ※インストール時だけでなく、バージョンアップ時にも、
+      initnatumeを実行する必要があります。
 
-      �ʤĤ�ϼ���ȳؽ�������̡��˴������Ƥ��ޤ������Ȥ��С�
+      なつめは辞書と学習情報を別々に管理しています。たとえば、
 
-        /usr/local/share/natume/ipadic.dat  �ǡ���
-        /usr/local/share/natume/ipadic.idx  ����ǥå���
-        ~/.natume/ipadic.sta                �ؽ����� 
+        /usr/local/share/natume/ipadic.dat  データ
+        /usr/local/share/natume/ipadic.idx  インデックス
+        ~/.natume/ipadic.sta                学習情報 
 
-      ����ǡ����ȳؽ�������԰��פ��ɤ�����ˡ�
-      initnatume�ϡ��Ť�����˴ؤ���ؽ�����򥯥ꥢ���ޤ���
-      (���Τ�����ϼ�ưŪ�˽��������褦�ˤ��٤��ʤΤǤ���....)
+      辞書データと学習情報の不一致を防ぐために、
+      initnatumeは、古い辞書に関する学習情報をクリアします。
+      (このあたりは自動的に処理されるようにすべきなのですが....)
 
 
-  3.3 natumeserver��ư����
+  3.3 natumeserverを起動する
 
-    �����ǡ����ĤΥ⡼�ɤ�����Ǥ��ޤ���
+    ここで、２つのモードを選択できます。
 
-    �⤷�����ʤ��ҤȤ������natumeserver��Ȥ��ΤǤ���С�
-    ���ʤ����ȤΥ桼�������¤ǡ�natumeserver��ư���뤳�Ȥ��Ǥ��ޤ���
-    (�����桼�����⡼�ɤȸƤ֤��Ȥˤ��ޤ�)
+    もし、あなたひとりだけがnatumeserverを使うのであれば、
+    あなた自身のユーザー権限で、natumeserverを起動することができます。
+    (これをユーザーモードと呼ぶことにします)
 
     $ /usr/local/sbin/natumeserver [-i]
 
-    ���ʤĤ�Ǥϡ���ǽ�ʸ¤ꤳ�Υ⡼�ɤ�Ȥ����Ȥ�侩���ޤ���
+    ※なつめでは、可能な限りこのモードを使うことを推奨します。
 
-    �⤷��ʣ���Υ桼������natumeserver��Ȥ��ΤǤ���С�
-    root���¤�natumeserver��ư����ɬ�פ�����ޤ���
-    (���������ԥ⡼�ɤȸƤ֤��Ȥˤ��ޤ�)
+    もし、複数のユーザーがnatumeserverを使うのであれば、
+    root権限でnatumeserverを起動する必要があります。
+    (これを管理者モードと呼ぶことにします)
 
     # /usr/local/sbin/natumeserver [-i]
 
-    ������ˤ��Ƥ⡢cannaserver��Ʊ�����ˡ�UNIX�ɥᥤ�󥽥��åȤ�����
-    ����ޤ������Τ��ᡢcannaserver��natumeserver��Ʊ���˵�ư�Ǥ��ޤ���
+    いずれにしても、cannaserverと同じ場所に、UNIXドメインソケットが作成
+    されます。そのため、cannaserverとnatumeserverは同時に起動できません。
 
       /tmp/.iroha_unix/IROHA
 
-    �ɤ������ˡ�����򤷤����ˤ�äơ������åȥե�����Υ����ʡ����ۤʤ�
-    ���Ȥˤʤ�ޤ���
+    どちらの方法を選択したかによって、ソケットファイルのオーナーが異なる
+    ことになります。
 
-    ��TCP��ͳ����³��ɬ�פʾ��ˤϡ�-i���ץ����ɬ�פǤ���
-      �ޤ���4. �������ƥ��򻲾Ȥ��ʤ��顢
-      ����Ū����³����Ĥ���ɬ�פ�����Ǥ��礦��
+    ※TCP経由の接続が必要な場合には、-iオプションが必要です。
+      また、4. セキュリティを参照しながら、
+      明示的に接続を許可する必要があるでしょう。
 
-  3.4 natumeserver����ߤ���
+  3.4 natumeserverを停止する
 
-    TERM�����ʥ���������ߤ��ޤ���
+    TERMシグナルを送ると停止します。
 
     $ kill <pid of natumeserver>
-    # kill <pid of natumeserver> �����ԥ⡼�ɤǵ�ư�������
+    # kill <pid of natumeserver> 管理者モードで起動した場合
 
 
-4. �������ƥ�
+4. セキュリティ
 
-  4.1 �Ŀ;���
+  4.1 個人情報
 
-    �ʤĤ�ϡ��桼����������񡢳ؽ�����ʤɡ��Ŀ;���ȹͤ������Τϡ�
-    ���٤Ƴƥ桼�����Υۡ���ǥ��쥯�ȥ����¸���ޤ���
+    なつめは、ユーザー定義辞書、学習情報など、個人情報と考えられるものは、
+    すべて各ユーザーのホームディレクトリに保存します。
 
       ~/.natume/
 
-    ����ϡ�natumeserver��ɤ���Υ⡼�ɤǵ�ư���Ƥ��Ƥ�Ʊ���Ǥ���
+    これは、natumeserverをどちらのモードで起動していても同じです。
 
-    natumeserver�ϡ����饤����Ȥ��������Ƥ����桼����̾��
-    /etc/passwd���鸫�Ĥ��Ф����Ȥ��ޤ���
+    natumeserverは、クライアントから送られてきたユーザー名を
+    /etc/passwdから見つけ出そうとします。
 
-    �ؼ����줿�桼������/etc/passwd��¸�ߤ�����ˤ�����
-    �б�����UID�ǤʤĤ�ΥХå�����ɥץ�������ư���ޤ���
+    指示されたユーザーが/etc/passwdに存在する場合にだけ、
+    対応するUIDでなつめのバックエンドプログラムを起動します。
 
-  4.2 ������������
+  4.2 アクセス制御
 
-    natumeserver�ϡ�����Ū�˵��Ĥ��줿���ɥ쥹����Τ���³����Ĥ��ޤ���
-    ����/�Ե��Ĥϡ���³�����б������ե������̵ͭ��Ƚ�Ǥ��ޤ���
-    (�ե��������Ȥϴط�����ޤ���)
+    natumeserverは、明示的に許可されたアドレスからのみ接続を許可します。
+    許可/不許可は、接続元に対応したファイルの有無で判断します。
+    (ファイルの中身は関係ありません)
 
-    initnatume��¹Ԥ����Ȥ��ˡ��ǥե���ȤȤ��ƤĤ��Σ��ĤΥե����뤬����
-    ����Ƥ��ޤ���
+    initnatumeを実行したときに、デフォルトとしてつぎの２つのファイルが作成
+    されています。
 
       ~/.natume/access/unix
       ~/.natume/access/127.0.0.1
 
-    ���Υե����뤬¸�ߤ��뤳�Ȥǡ�UNIX�ɥᥤ�󥽥��åȤ����127.0.0.1�����
-    TCP��³�����Ĥ���ޤ���
+    このファイルが存在することで、UNIXドメインソケットおよび127.0.0.1からの
+    TCP接続が許可されます。
 
-    ���Τۤ��Υ��ɥ쥹������³���������ˤϡ�
-    IP���ɥ쥹��ե�����̾�Ȥ�����Υե������������Ƥ���������
+    そのほかのアドレスから接続したい場合には、
+    IPアドレスをファイル名とする空のファイルを作成してください。
 
-    (��)
+    (例)
       $ touch ~/.natume/access/192.168.1.2
 
-    ������󡢥ե������������кƤ���³����ݤǤ��ޤ���
+    もちろん、ファイルを削除すれば再び接続を拒否できます。
 
 
-  4.3 Cannaͳ�������
+  4.3 Canna由来の問題
 
-    Canna�ץ��ȥ����ǧ�ڤϤ���ޤ���
+    Cannaプロトコルに認証はありません。
 
-    4.1�ǡ��֥��饤����Ȥ��������Ƥ����桼����̾�פȽ񤭤ޤ�������
-    ����⤢���ޤǼ��ʿ���ʤΤǤ���
-    natumeserver�ˣ��ĤΥ⡼�ɤ�Ƴ�������Τϡ�
-    ���Τ�����δ������򤹤����Ǥ�ڸ����뤿��ζ����κ��Ǥ���
+    4.1で、「クライアントから送られてきたユーザー名」と書きましたが、
+    これもあくまで自己申告なのです。
+    natumeserverに２つのモードを導入したのは、
+    このあたりの危険性をすこしでも軽減するための苦肉の策です。
 
 
-5. ���饤�����
+5. クライアント
 
-  5.1 ư���ǧ����Ƥ��륯�饤�����
+  5.1 動作が確認されているクライアント
 
-    �ʤĤ�ϡ�Canna�ߴ��ץ��ȥ����������Ƥ���Τǡ�
-    �ۤȤ�ɤ�Canna���饤����Ȥϡ����Τޤ�natumeserver����³�Ǥ��ޤ���
-    �ʲ�����ǧ�Ǥ��Ƥ����ΤǤ���
+    なつめは、Canna互換プロトコルを実装しているので、
+    ほとんどのCannaクライアントは、そのままnatumeserverに接続できます。
+    以下、確認できているものです。
 
     5.1.1 emcws - http://emacs-21.ki.nu/
 
-      ���ޤ���ʸ��⤳��ǽ񤤤Ƥ���Τ�����פ�����
-      (��: ���θ塢�錄����yc�˰ܹԤ��Ƥ��ޤ��ޤ���)
+      いまこの文書もこれで書いているので大丈夫そう。
+      (註: その後、わたしはycに移行してしまいました)
 
     5.1.2 uim - http://anthy.sourceforge.jp/cgi-bin/hikija/hiki.cgi
 
-      Mozilla�ؤ����ϤˤϤ����ȤäƤ���ΤǤ��֤�����ס�
+      Mozillaへの入力にはこれを使っているのでたぶん大丈夫。
 
     5.1.3 kinput2
 
-      ����äȤ����ȤäƤߤ����Ȥꤢ�����Ѵ��Ǥ����Τ�����פ��Ȼפ���
+      ちょっとだけ使ってみた。とりあえず変換できたので大丈夫だと思う。
 
     5.1.4 yc - http://www.ceres.dti.ne.jp/~knak/yc.html
 
-      ����ס�
+      大丈夫。
 
-      yc�ξ��ˤϡ��虜�虜natumeserver��ư���ʤ��Ƥ⡢
-      ľ�ܡ��Хå�����ɥץ�������ư������ˡ���Ȥ��ޤ���
+      ycの場合には、わざわざnatumeserverを起動しなくても、
+      直接、バックエンドプロセスを起動する方法が使えます。
 
         (setq yc-icanna-path "natume")
         (load-library "yc")
 
-     �������ƥ������Ǥϡ����줬��������ά�Ǥ���
+     セキュリティの点では、これが正しい戦略です。
 
     5.1.5 Tamago 4+Canna patch - http://cgi18.plala.or.jp/~nyy/canna/
 
-      ����פ�������ǰ�ʤ��顢˭�٤ʼ����Ϣ�ε�ǽ�ϻȤ��ޤ���
+      大丈夫そう。残念ながら、豊富な辞書関連の機能は使えません。
 
 
-  5.2 (���֤�)ư��ʤ����饤�����
+  5.2 (たぶん)動作しないクライアント
 
-    �ʤĤ��Canna�ߴ��򤦤��äƤ��ޤ�������������Ƥ���Τϡ�Canna�ץ��ȥ���
-    ���ͽ���������Ƥ��륳�ޥ�ɤΤʤ��ǡ�����Ū�ˤ褯�Ȥ�줽������ʬ����
-    �Ǥ���
+    なつめはCanna互換をうたっていますが、実装されているのは、Cannaプロトコル
+    仕様書で定義されているコマンドのなかで、一般的によく使われそうな部分だけ
+    です。
 
-    �äˡ�����˴ؤ��Ƥϡ��ʻ��ηϤ�ǡ�����¤��ޤä����ۤʤ�Τǡ�
-    Canna�Ѥμ�������ġ���ʤɤϡ��ޤ���ʬ�δֻȤ��ʤ��Ǥ��礦��
+    特に、辞書に関しては、品詞体系もデータ構造もまったく異なるので、
+    Canna用の辞書管理ツールなどは、まだ当分の間使えないでしょう。
 
-    5.1�Ǥ��������饤����ȤǤ⡢����˴ؤ���¼�Ū�����ϤǤ��ޤ���
-    �����ư����뤿��˥��ߡ��ν������Ѱդ�����ʬ�⤢��ޤ�����
-    ���ޤΤȤ����ʤĤ�Ǥϲ��⤷�Ƥ��ޤ���
+    5.1であげたクライアントでも、辞書に関する実質的な操作はできません。
+    正常に動作させるためにダミーの処理を用意した部分もありますが、
+    いまのところなつめでは何もしていません。
 
-    �桼��������ˤĤ��Ƥϡ�6. �桼��������򻲾Ȥ��Ƥ���������
+    ユーザー辞書については、6. ユーザー辞書を参照してください。
 
-6. �桼��������
+6. ユーザー辞書
 
-  6.1 ����Υե����ޥå�
+  6.1 辞書のフォーマット
 
-    ipadic��Ʊ���ե����ޥåȤ���Ѥ��ƥ桼�������Ѥμ�����ɲäǤ��ޤ���
-    �ʻ��ηϤ�ե�����ե����ޥåȤξܺ٤ϡ�ipadic�Υ桼�������ޥ˥奢���
-    ���Ȥ��Ƥ���������
+    ipadicと同じフォーマットを使用してユーザー専用の辞書を追加できます。
+    品詞体系やファイルフォーマットの詳細は、ipadicのユーザーズマニュアルを
+    参照してください。
 
-    ipadic 2.7.0 �桼�������ޥ˥奢��
+    ipadic 2.7.0 ユーザーズマニュアル
     ipadic-2.7.0/doc/ipadic-ja.pdf
 
-  6.2 ����ι���
+  6.2 辞書の更新
 
-    initnatume��¹Ԥ���ȥ���ץ뤬~/.natume�˥��󥹥ȡ��뤵��Ƥ��ޤ���
+    initnatumeを実行するとサンプルが~/.natumeにインストールされています。
 
       ~/.natume/User.dic
 
-    User.dic��Ŭ�����Խ����������ǡ�mknadic��¹Ԥ���ȼ��񤬹�������ޤ���
+    User.dicを適当に編集したうえで、mknadicを実行すると辞書が更新されます。
 
-    �����κ�Ȥϡ��ʤĤ����Ѥ��Ƥ��륢�ץꥱ��������
-      ���٤���ߤ��Ƥ���Ԥä������褤�Ǥ��礦��
+    ※この作業は、なつめを使用しているアプリケーションを
+      すべて停止してから行った方がよいでしょう。
 
       $ cd ~/.natume/
       $ mknadic
 
-    mknadic��User.dic����Ĥ��Υե������������ޤ���
-    �ʤĤ�Ϥ����Υե������ưŪ�˥桼��������Ȥ���ǧ�����ޤ���
+    mknadicはUser.dicからつぎのファイルを作成します。
+    なつめはこれらのファイルを自動的にユーザー辞書として認識します。
 
-      ~/.natume/user.dat  �ǡ���
-      ~/.natume/user.idx  ����ǥå���
-      ~/.natume/user.sta  �ؽ�����
+      ~/.natume/user.dat  データ
+      ~/.natume/user.idx  インデックス
+      ~/.natume/user.sta  学習情報
 
-  6.3 �ҥ��
+  6.3 ヒント
 
-    ipadic�Υޥ˥奢��ˤҤ��ǤϤ����ޤ���!!
+    ipadicのマニュアルにひるんではいけません!!
 
-    �Ϥ���ϡ�ipadic�˴ޤޤ�Ƥ��뼭��(ipadic-2.7.0/Noun.dic�ʤ�)��ʤ����
-    �ߤޤ��礦��������������褦��ñ��Υ���ȥ꡼��̤��������ѹ����Ƥ���
-    �ۤȤ�ɤξ��Ϥ��ޤ��Ԥ��ޤ���
+    はじめは、ipadicに含まれている辞書(ipadic-2.7.0/Noun.dicなど)をながめて
+    みましょう。そこから似たような単語のエントリーをぬきだして変更してやれば
+    ほとんどの場合はうまく行きます。
     
-    �ʻ��ʬ��ˤ��ޤ���м��ˤʤ�ɬ�פϤ���ޤ��󡣥����Ȥ�Ŭ���˳�����Ƥ�
-    ���ޤ��ޤ��󡣤ʤĤ�γؽ���ǽ���ʤ�Ȥ����Ƥ���ޤ���
-    (��ʬ����Ͽ����ñ������ˤ˻Ȥ��Ǥ��礦��)
+    品詞の分類にあまり神経質になる必要はありません。コストも適当に割り当てて
+    かまいません。なつめの学習機能がなんとかしてくれます。
+    (自分で登録した単語は頻繁に使うでしょう？)
 
