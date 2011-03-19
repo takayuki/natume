@@ -24,7 +24,7 @@ module Hinsi (
     pp,lp,test
   ) where
 
-import IO
+import System.IO
 import qualified Katuyou
 import qualified KType
 import ScmParse hiding (pp)
@@ -81,6 +81,7 @@ enum xs = snd (enum0 (0,[]) xs)
 
 readclass :: String -> String -> String -> IO [Hinsi]
 readclass g f t = do h <- openFile g ReadMode
+                     hSetEncoding h latin1
                      s <- hGetContents h
                      let gs = (eval (parse (tokenize s)))
                      ts <- Katuyou.readtypeform f t
@@ -102,6 +103,7 @@ getbyname key (x:xs) = if isprefixof key (name x)
 
 compile :: String -> IO ()
 compile file = do h <- openFile file ReadMode
+                  hSetEncoding h latin1
                   s <- hGetContents h
                   let gs = (eval (parse (tokenize s)))
                   writeFile "Grammar.hs"

@@ -23,7 +23,7 @@ module KType (
     pp,fmt0,fmt1
   ) where
 
-import IO
+import System.IO
 import qualified KForm
 import ScmParse hiding (pp)
 import ScmToken
@@ -49,6 +49,7 @@ eval (x:xs) = (eval1 x) : eval xs
 
 readtype :: String -> IO [([String],[String])]
 readtype path = do h <- openFile path ReadMode
+                   hSetEncoding h latin1
                    s <- hGetContents h
                    let ks = (eval (parse (tokenize s)))
                    return ks

@@ -21,7 +21,7 @@ module MkDic (
   ) where
 
 import Prelude hiding (id,last)
-import IO
+import System.IO
 import Compile (rensetu_tbl1,rensetu_tbl2)
 import qualified KForm
 import qualified KType
@@ -177,5 +177,6 @@ eval p r (h:w:xs) = map (\l -> l {point=p}) ls ++ (eval (p+1) r' xs)
 readdic :: Int -> String -> IO [Lex]
 readdic start path =
   do h <- openFile path ReadMode
+     hSetEncoding h latin1
      s <- hGetContents h
      return (eval start (rensetu_tbl2,[]) (parse (tokenize s)))

@@ -18,7 +18,7 @@
  --}
 module Main where
 
-import IO
+import System.IO
 import Char
 import Monad
 import System
@@ -245,6 +245,7 @@ convert :: Handle -> String -> [String] -> IO ()
 convert _ _   []     = return ()
 convert o dir (x:xs) =
   do i <- openFile (dir ++ Config.pathsep ++ x) ReadMode
+     hSetEncoding i latin1
      ls <- readlines i
      mapM_ (\l -> mapM_ (hPutStrLn o) (parse l)) ls
      hFlush o
@@ -253,6 +254,7 @@ convert o dir (x:xs) =
 mainDo :: (String,String,[String]) -> IO ()
 mainDo (base,dir,dics) =
   do o <- openFile (base ++ ".dic") WriteMode
+     hSetEncoding o latin1
      convert o dir dics
 
 mainOpts :: ([Opt],[String]) -> (String,String) -> IO ()

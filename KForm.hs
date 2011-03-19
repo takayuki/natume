@@ -23,7 +23,7 @@ module KForm (
     pp,fmt0,fmt1
   ) where
 
-import IO
+import System.IO
 import ScmParse hiding (pp)
 import ScmToken
 
@@ -85,6 +85,7 @@ enum xs = enum0 1 xs
 
 readform :: String -> IO [((Int,String),[KForm])]
 readform path = do h <- openFile path ReadMode
+                   hSetEncoding h latin1
                    s <- hGetContents h
                    let fs = (eval (parse (tokenize s)))
                    let (names,forms) = unzip fs

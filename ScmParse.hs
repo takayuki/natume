@@ -29,7 +29,7 @@ module ScmParse (
 import Char
 import Parser
 import ScmToken
-import IO
+import System.IO
 
 data Expr = ExprInt Int
           | ExprName String
@@ -251,6 +251,7 @@ pp = prettyPrint
 
 {-
 test = do h <- openFile "test.scm" ReadMode
+          hSetEncoding h latin1
           s <- hGetContents h
           let es = parse (tokenize s)
           mapM pp es

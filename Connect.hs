@@ -21,7 +21,7 @@ module Connect (
     readconn
   ) where
 
-import IO
+import System.IO
 import ScmParse
 import ScmToken
 
@@ -73,6 +73,7 @@ eval (x:xs) = (eval1 x) : eval xs
 
 readconn :: String -> IO [Connect]
 readconn path = do h <- openFile path ReadMode
+                   hSetEncoding h latin1
                    s <- hGetContents h
                    return (eval (parse (tokenize s)))
 
