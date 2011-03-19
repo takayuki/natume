@@ -51,7 +51,7 @@ mainDo (base,dir) =
        else return ()
      cs <- Connect.readconn (dir ++ Config.pathsep ++ "connect.cha")
      foldM (\n (connect,cost) ->
-              do key <- newArray0 0 (reverse connect)
+              do key <- newArray0 0 (map (fromInteger . toInteger) (reverse connect))
                  status' <- connect_add id key (length connect) cost
                  if status' == -1
                    then error "unable to register rule in dictonary"

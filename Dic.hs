@@ -23,6 +23,7 @@ module Dic (
   ) where
 
 import Prelude hiding (id,last)
+import CTypes
 import CString
 import Foreign
 import IO
@@ -34,7 +35,7 @@ import qualified Lib
 import qualified Rensetu
 
 type Dic = (Int,(Ptr CString),(Ptr CString),
-            (Ptr Int),(Ptr Int),(Ptr Int),(Ptr Int),(Ptr Int))
+            (Ptr CInt),(Ptr CInt),(Ptr CInt),(Ptr CInt),(Ptr CInt))
 
 data Mrph = MkMrph String String Int Int Int Int Int Int
             deriving (Show)
@@ -107,17 +108,20 @@ dic_init idx dat sta =
                       free csta
                       return [(id,yomi,word,table,cost,point,style,last)]
 
+peekCInt :: CInt -> IO Int
+peekCInt = return . fromInteger . toInteger
+
 fetch2 :: Dic -> Int -> Int -> IO [Mrph]
 fetch2 dic i num =
   let (id,yomi,word,table,cost,point,style,last) = dic in
     if i < num
     then do y <- peekElemOff yomi i >>= peekCString
             w <- peekElemOff word i >>= peekCString
-            t <- peekElemOff table i
-            c <- peekElemOff cost i
-            p <- peekElemOff point i
-            s <- peekElemOff style i
-            m <- peekElemOff last i
+            t <- peekElemOff table i >>= peekCInt
+            c <- peekElemOff cost i >>= peekCInt
+            p <- peekElemOff point i >>= peekCInt
+            s <- peekElemOff style i >>= peekCInt
+            m <- peekElemOff last i >>= peekCInt
             let f = MkMrph y w t c id p s m
             fs <- fetch2 dic (i+1) num
             return (f:fs)

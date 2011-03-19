@@ -22,6 +22,7 @@ module Canna (
 
 import Prelude hiding (id,init,min)
 import IO
+import CTypes
 import CString
 import Foreign
 import Monad
@@ -32,8 +33,8 @@ import Re
 import Session
 import qualified Lib
 
-type Server = (Int,(Ptr Int),(Ptr Int),(Ptr Int),
-               (Ptr Int),(Ptr Int),(Ptr Int),CString,(Ptr CString))
+type Server = (Int,(Ptr CInt),(Ptr CInt),(Ptr CInt),
+               (Ptr CInt),(Ptr CInt),(Ptr CInt),CString,(Ptr CString))
 
 bufsize,buf2width,buf2height :: Int
 (bufsize,buf2width,buf2height) = (2048,64,256)
@@ -60,6 +61,12 @@ poke2 :: (Ptr CString) -> [String] -> IO Int
 poke2 buf2 = foldM (\n x -> do newCString x >>= pokeElemOff buf2 n
                                return (n+1))
                    (0 :: Int)
+
+peekCInt :: (Ptr CInt) -> IO Int
+peekCInt p = peek p >>= (return . fromInteger . toInteger)
+
+pokeCInt :: (Ptr CInt) -> Int -> IO ()
+pokeCInt x = poke x . fromInteger . toInteger
 
 unalloc2 :: (Storable a) => (Ptr (Ptr a)) -> IO ()
 unalloc2 p = do q <- peekArray buf2height p
@@ -107,7 +114,7 @@ accept srv =
 establish :: Server -> Int -> IO Int
 establish srv ack =
   let (id,maj,min,cxt,aux0,_,_,_,_) = srv in
-    do poke cxt ack
+    do pokeCInt cxt ack
        poke aux0 3
        status <- Lib.canna_establish id maj min cxt aux0
        return status
@@ -135,7 +142,7 @@ response srv =
 type Service = (Server,Session)
 
 -- Finalization
-service :: Service -> Int -> Int -> IO Service
+service :: Service -> CInt -> CInt -> IO Service
 service s 0x2 0 =
   let (srv,ssn) = s in
     let (_,_,_,_,aux0,_,_,_,_) = srv in
@@ -149,7 +156,7 @@ service s 0x2 0 =
 service s 0x3 0 =
   let (srv,(con,dics,cxts)) = s in
     let (_,_,_,_,aux0,_,_,_,_) = srv in
-      do poke aux0 (length cxts)
+      do pokeCInt aux0 (length cxts)
          response srv
          dispatch (srv,(con,dics,cxts++[(0,[])]))
 
@@ -165,12 +172,12 @@ service s 0x3 1 =
 service s 0x4 0 =
   let (srv,(con,dics,cxts)) = s in
     let (_,_,_,_,aux0,_,_,_,_) = srv in
-      do src <- peek aux0
+      do src <- peekCInt aux0
          if (length cxts) <= src
            then do poke aux0 (-1)
                    response srv
                    dispatch s
-           else do poke aux0 (length cxts)
+           else do pokeCInt aux0 (length cxts)
                    response srv
                    dispatch (srv,(con,dics,cxts ++ [cxts !! src]))
 
@@ -178,7 +185,7 @@ service s 0x4 0 =
 service s 0x5 0 =
   let (srv,(con,dics,cxts)) = s in
     let (_,_,_,_,aux0,_,_,_,_) = srv in
-      do cont <- peek aux0
+      do cont <- peekCInt aux0
          poke aux0 0
          response srv
          dispatch (srv,(con,dics,updateContext cont (0,[]) cxts))
@@ -190,8 +197,8 @@ service s 0x6 0 =
       do let dict = ["bushu","chimei","fuzokugo","hojomwd","hojoswd",
                      "iroha","kanasample","katakana","keishiki",
                      "necgaiji","number","software","suffix","user"]
-         poke aux0 (length dict)
-         poke aux1 ((length dict) + 1)
+         pokeCInt aux0 (length dict)
+         pokeCInt aux1 ((length dict) + 1)
          poke2 buf2 (dict ++ [""])
          response srv
          dispatch s
@@ -260,8 +267,8 @@ service s 0xe 0 =
 service s 0xf 0 =
   let (srv,ssn@(_,_,cxts)) = s in
     let (_,_,_,cxt,aux0,aux1,_,buf,buf2) = srv in
-      do cont <- peek cxt
-         mode <- peek aux0
+      do cont <- peekCInt cxt
+         mode <- peekCInt aux0
          input <- peekCString buf
          if (length cxts) <= cont
            then do poke aux0 (-1)
@@ -271,8 +278,8 @@ service s 0xf 0 =
                    let (_,_,cxts') = ssn'
                    let (_,pause) = cxts' !! cont
                    let conv = map (concatMap (fst4.head.snd)) pause
-                   poke aux0 (length conv)
-                   poke aux1 ((length conv) + 1)
+                   pokeCInt aux0 (length conv)
+                   pokeCInt aux1 ((length conv) + 1)
                    poke2 buf2 (conv ++ [""])
                    --mapM_ putStrLn conv
                    response srv
@@ -282,9 +289,9 @@ service s 0xf 0 =
 service s 0x10 0 =
   let (srv,(_,dics,cxts)) = s in
     let (_,_,_,cxt,aux0,aux1,_,buf,_) = srv in
-      do cont <- peek cxt
-         idx <- peek aux0
-         mode <- peek aux1
+      do cont <- peekCInt cxt
+         idx <- peekCInt aux0
+         mode <- peekCInt aux1
          final <- peekArray idx ((castPtr buf) :: Ptr Int)
          let (_,pause) = cxts !! cont
          if (length cxts) <= cont
@@ -317,8 +324,8 @@ service s 0x10 0 =
 service s 0x11 0 =
   let (srv,ssn@(_,_,cxts)) = s in
     let (_,_,_,cxt,aux0,aux1,_,_,buf2) = srv in
-      do cont <- peek cxt
-         idx <- peek aux0
+      do cont <- peekCInt cxt
+         idx <- peekCInt aux0
          let (_,pause) = cxts !! cont
          if (length cxts) <= cont || (length pause) <= idx
            then do poke aux0 (-1)
@@ -331,8 +338,8 @@ service s 0x11 0 =
                    let cand = map fst4 (snd (head target))
                    let intact = concatMap (fst4.head.snd) (tail target)
                    let cand' = map (++intact) cand
-                   poke aux0 (length cand')
-                   poke aux1 ((length cand') + 1)
+                   pokeCInt aux0 (length cand')
+                   pokeCInt aux1 ((length cand') + 1)
                    poke2 buf2 (cand' ++ [""])
                    response srv
                    dispatch (srv,ssn')
@@ -341,8 +348,8 @@ service s 0x11 0 =
 service s 0x12 0 =
   let (srv,(_,_,cxts)) = s in
     let (_,_,_,cxt,aux0,aux1,_,_,buf2) = srv in
-      do cont <- peek cxt
-         idx <- peek aux0
+      do cont <- peekCInt cxt
+         idx <- peekCInt aux0
          let (_,pause) = cxts !! cont
          if (length cxts) <= cont || (length pause) <= idx
            then do poke aux0 (-1)
@@ -352,7 +359,7 @@ service s 0x12 0 =
                    let y = yomi (fst (head target))
                    let intact = concatMap yomi (map fst (tail target))
                    let y' = y ++ intact
-                   poke aux0 (length (split y'))
+                   pokeCInt aux0 (length (split y'))
                    poke aux1 2
                    poke2 buf2 ([y',""])
                    response srv
@@ -362,9 +369,9 @@ service s 0x12 0 =
 service s 0x1a 0 =
   let (srv,ssn@(_,_,cxts)) = s in
     let (_,_,_,cxt,aux0,aux1,_,_,buf2) = srv in
-      do cont <- peek cxt
-         idx <- peek aux0
-         size <- peek aux1
+      do cont <- peekCInt cxt
+         idx <- peekCInt aux0
+         size <- peekCInt aux1
          let (_,pause) = cxts !! cont
          if (length cxts) <= cont || (length pause) <= idx
            then do poke aux0 (-1)
@@ -382,10 +389,10 @@ service s 0x1a 0 =
                    let (_,_,cxts') = ssn'
                    let (_,pause') = cxts' !! cont
                    let conv = map (concatMap (fst4.head.snd)) pause'
-                   poke aux0 (length conv)
+                   pokeCInt aux0 (length conv)
                    let conv' = drop idx conv
                    --mapM_ putStrLn conv'
-                   poke aux1 ((length conv') + 1)
+                   pokeCInt aux1 ((length conv') + 1)
                    poke2 buf2 (conv' ++ [""])
                    response srv
                    dispatch (srv,ssn')
@@ -412,8 +419,8 @@ service s 0x1c 0 =
 service s 0x1d 0 =
   let (srv,ssn@(_,_,cxts)) = s in
     let (_,_,_,cxt,aux0,_,aux2,_,_) = srv in
-      do cont <- peek cxt
-         idx <- peek aux0
+      do cont <- peekCInt cxt
+         idx <- peekCInt aux0
          let (_,pause) = cxts !! cont
          if (length cxts) <= cont || (length pause) <= idx
            then do poke aux0 (-1)
@@ -426,7 +433,7 @@ service s 0x1d 0 =
                    let cand = map fst4 (snd (head target))
                    let intact = concatMap (fst4.head.snd) (tail target)
                    let cand' = map (++intact) cand
-                   poke aux2 (length cand')
+                   pokeCInt aux2 (length cand')
                    response srv
                    dispatch (srv,ssn')
 

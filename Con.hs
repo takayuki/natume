@@ -23,11 +23,12 @@ module Con (
 import Prelude hiding (id,last)
 import IO
 import CString
+import CTypes
 import Foreign
 import Ptr
 import qualified Lib
 
-type Con = (Int,(Ptr Int),(Ptr Int))
+type Con = (Int,(Ptr CInt),(Ptr CInt))
 
 width :: Int
 width = 32
@@ -59,12 +60,12 @@ fetch1 con i n =
             r <- peekArray num rule
             c <- peek cost
             fs <- fetch1 con (i+1) n
-            return ((r,c):fs)
+            return ((map (fromInteger . toInteger) r,(fromInteger $ toInteger c)):fs)
     else return []
 
 connect_search :: Con -> [Int] -> IO [([Int],Int)]
 connect_search con key = let (id,_,_) = con in
-                           do rule <- newArray key
+                           do rule <- newArray (map (fromInteger . toInteger) key)
                               num <- Lib.connect_search id rule (length key)
                               ret <- fetch1 con 0 num
                               free rule

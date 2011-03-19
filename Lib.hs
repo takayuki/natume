@@ -28,6 +28,7 @@ module Lib (
   ) where
 
 import CString
+import CTypes
 import Foreign
 import Ptr
 
@@ -40,7 +41,7 @@ foreign import ccall "static connect.h connect_start"
 foreign import ccall "static connect.h connect_stop"
   connect_stop :: Int -> IO ()
 foreign import ccall "static connect.h connect_add"
-  connect_add :: Int -> (Ptr Int) -> Int -> Int -> IO Int
+  connect_add :: Int -> (Ptr CInt) -> Int -> Int -> IO Int
 foreign import ccall "static connect.h connect_build"
   connect_build :: Int -> IO Int
 foreign import ccall "static connect.h connect_load"
@@ -48,9 +49,9 @@ foreign import ccall "static connect.h connect_load"
 foreign import ccall "static connect.h connect_unload"
   connect_unload :: Int -> IO ()
 foreign import ccall "static connect.h connect_search"
-  connect_search :: Int -> (Ptr Int) -> Int -> IO Int
+  connect_search :: Int -> (Ptr CInt) -> Int -> IO Int
 foreign import ccall "static connect.h connect_fetch"
-  connect_fetch :: Int -> Int -> (Ptr Int) -> Int -> (Ptr Int) -> IO Int
+  connect_fetch :: Int -> Int -> (Ptr CInt) -> Int -> (Ptr CInt) -> IO Int
 foreign import ccall "static connect.h connect_dump"
   connect_dump :: Int -> IO ()
 
@@ -78,8 +79,8 @@ foreign import ccall "static dic.h dic_search"
   dic_search :: Int -> CString -> Int -> IO Int
 foreign import ccall "static dic.h dic_fetch"
   dic_fetch :: Int -> Int -> (Ptr CString) -> (Ptr CString) ->
-               (Ptr Int) -> (Ptr Int) ->
-               (Ptr Int) -> (Ptr Int) -> (Ptr Int) -> Int -> Int -> IO Int
+               (Ptr CInt) -> (Ptr CInt) ->
+               (Ptr CInt) -> (Ptr CInt) -> (Ptr CInt) -> Int -> Int -> IO Int
 foreign import ccall "static dic.h dic_dump"
   dic_dump :: Int -> IO ()
 
@@ -88,15 +89,15 @@ foreign import ccall "static canna.h canna_init"
 foreign import ccall "static canna.h canna_free"
   canna_free :: Int -> IO ()
 foreign import ccall "static canna.h canna_accept"
-  canna_accept :: Int -> (Ptr Int) -> (Ptr Int) ->
-                  (Ptr Int) -> CString -> Int -> IO Int
+  canna_accept :: Int -> (Ptr CInt) -> (Ptr CInt) ->
+                  (Ptr CInt) -> CString -> Int -> IO Int
 foreign import ccall "static canna.h canna_establish"
-  canna_establish :: Int -> (Ptr Int) -> (Ptr Int) ->
-                     (Ptr Int) -> (Ptr Int) -> IO Int
+  canna_establish :: Int -> (Ptr CInt) -> (Ptr CInt) ->
+                     (Ptr CInt) -> (Ptr CInt) -> IO Int
 foreign import ccall "static canna.h canna_request"
-  canna_request :: Int -> (Ptr Int) -> (Ptr Int) -> (Ptr Int) ->
-              (Ptr Int) -> (Ptr Int) -> (Ptr Int) -> CString -> Int -> IO Int
+  canna_request :: Int -> (Ptr CInt) -> (Ptr CInt) -> (Ptr CInt) ->
+              (Ptr CInt) -> (Ptr CInt) -> (Ptr CInt) -> CString -> Int -> IO Int
 foreign import ccall "static canna.h canna_response"
-  canna_response :: Int -> (Ptr Int) -> (Ptr Int) -> (Ptr Int) ->
-                (Ptr Int) -> (Ptr Int) -> (Ptr Int) -> (Ptr CString) -> IO Int
+  canna_response :: Int -> (Ptr CInt) -> (Ptr CInt) -> (Ptr CInt) ->
+                (Ptr CInt) -> (Ptr CInt) -> (Ptr CInt) -> (Ptr CString) -> IO Int
 
