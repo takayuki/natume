@@ -1,0 +1,63 @@
+#! /bin/sh
+#
+#  Natume -- an implementation of Kana-Kanji conversion in Haskell
+#  Copyright (C) 2006 2007 Takayuki Usui
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+#
+prefix="@prefix@"
+exec_prefix="${prefix}"
+bindir="${exec_prefix}/bin"
+libexecdir="${exec_prefix}/libexec"
+datadir="${prefix}/share"
+
+nadicdir="${datadir}/natume"
+dotnatume="${HOME}/.natume"
+
+version() { echo "@PACKAGE_VERSION@"; exit 0; }
+help() { echo "initnatume [-hv]"; exit 0; }
+
+while test ! "x$#" = x0; do
+  case $1 in
+   -v) version;;
+   *) help;;
+  esac
+  shift
+done
+
+if test ! -d "${dotnatume}" && mkdir "${dotnatume}"; then
+  chmod 700 "${dotnatume}"
+fi
+
+for i in ipadic.sta extdic.sta; do
+  cp -f ${nadicdir}/${i} "${dotnatume}" || exit 1
+done
+
+for i in User.dic; do
+  if test ! -f "${dotnatume}/${i}" || \
+     cmp ${nadicdir}/${i} "${dotnatume}/${i}" >/dev/null 2>&1; then
+    cp -f ${nadicdir}/${i} "${dotnatume}/${i}" || exit 1
+    for j in user.idx user.dat user.sta; do
+      cp -f ${nadicdir}/${j} "${dotnatume}/${j}" || exit 1
+    done
+  fi
+done
+
+if test ! -d "${dotnatume}/allow" && mkdir "${dotnatume}/allow"; then
+  touch "${dotnatume}/allow/unix"
+  touch "${dotnatume}/allow/127.0.0.1"
+fi
+
+exit 0

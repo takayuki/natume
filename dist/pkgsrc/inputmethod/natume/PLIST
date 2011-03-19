@@ -1,0 +1,17 @@
+bin/initnatume
+bin/natume
+bin/mknadic
+libexec/natume/natume
+sbin/natumeserver
+share/natume/User.dic
+share/natume/connect.dat
+share/natume/connect.idx
+share/natume/ipadic.dat
+share/natume/ipadic.idx
+share/natume/ipadic.sta
+share/natume/extdic.dat
+share/natume/extdic.idx
+share/natume/extdic.sta
+share/natume/user.dat
+share/natume/user.idx
+share/natume/user.sta

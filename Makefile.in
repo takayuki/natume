@@ -1,0 +1,106 @@
+#
+#  Natume -- an implementation of Kana-Kanji conversion in Haskell
+#  Copyright (C) 2006 2007 Takayuki Usui
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+#
+srcdir = @srcdir@
+prefix = @prefix@
+exec_prefix = $(prefix)
+bindir = $(exec_prefix)/bin
+sbindir = $(exec_prefix)/sbin
+libexecdir = $(exec_prefix)/libexec
+datadir = $(prefix)/share
+
+CC = @CC@
+CPPFLAGS = @DEFS@ -I.
+CFLAGS = -Wall @CFLAGS@
+LDFLAGS = -L. @LDFLAGS@
+LIBS = -lna @LIBS@
+AR = @AR@
+GHC = @GHC@
+GHC_OPTS = -F -pgmF ./h98safe -O2 -Wall -ffi -funbox-strict-fields $(LDFLAGS) $(LIBS)
+INSTALL = @INSTALL@
+IPADIC = ./ipadic-2.7.0
+CANNADIC = ./cannadic-0.95c
+
+.c.o:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $(srcdir)/$< 
+
+all: exec natumeserver dics
+
+exec: h98safe libna.a
+	$(GHC) --make $(GHC_OPTS) -o compile compile.hs
+	./compile -I $(IPADIC)
+	$(GHC) --make $(GHC_OPTS) -o mknacon mknacon.hs
+	$(GHC) --make $(GHC_OPTS) -o mknadic mknadic.hs
+	$(GHC) --make $(GHC_OPTS) -o natume natume.hs
+	$(GHC) --make $(GHC_OPTS) -o impcadic impcadic.hs
+
+h98safe: h98safe.o
+	$(CC) -O2 -Wall -o h98safe h98safe.c
+
+natumeserver: natumeserver.o libna.a
+	$(CC) -O2 -Wall -o natumeserver natumeserver.o $(LDFLAGS) $(LIBS)
+
+libna.a: array.o canna.o connect.o da.o dic.o sig.o
+	$(AR) rcs libna.a array.o canna.o connect.o da.o dic.o sig.o
+
+dics:
+	./mknacon -I $(IPADIC)
+	./impcadic -I $(CANNADIC)
+	./mknadic -I $(IPADIC) Cannadic.dic
+	./mknadic -f extdic Extent.dic
+	./mknadic -f user User.dic
+
+install:
+	${INSTALL} -m 755 -d ${bindir}
+	${INSTALL} -m 755 -d ${sbindir}
+	${INSTALL} -m 755 -d ${libexecdir}/natume
+	${INSTALL} -m 755 -d ${datadir}/natume
+	${INSTALL} -m 755 natume.sh ${bindir}/natume
+	${INSTALL} -m 755 initnatume.sh ${bindir}/initnatume
+	${INSTALL} -m 755 -s mknadic ${bindir}/mknadic
+	${INSTALL} -m 755 -s natume ${libexecdir}/natume/natume
+	${INSTALL} -m 755 -s natumeserver ${sbindir}/natumeserver
+	for i in connect.idx connect.dat ipadic.idx ipadic.dat ipadic.sta \
+	         extdic.idx extdic.dat extdic.sta \
+	         User.dic user.idx user.dat user.sta; do \
+	  ${INSTALL} -m 644 $$i ${datadir}/natume; done
+
+clean:
+	rm -f h98safe compile mknadic mknacon
+	rm -f natume natumeserver
+	rm -f natume.sh initnatume.sh 
+	rm -f libna.a
+	rm -f *~ *.hi *.o *.core core
+	rm -f config.cache config.log
+
+distclean: clean
+	rm -f Cforms.hs Ctypes.hs Grammar.hs Ren.hs
+	rm -f Config.hs config.h natume.sh natumeserver.h
+	rm -f Cannadic.dic
+	rm -f *.idx *.dat *.sta *.tmp
+	rm -f Makefile
+	rm -f config.status
+
+array.o: array.c config.h array.h
+canna.o: canna.c config.h array.h canna.h
+connect.o: connect.c config.h connect.h array.h da.h
+da.o: da.c config.h da.h array.h
+dic.o: dic.c config.h dic.h array.h da.h
+h98safe.o: h98safe.c
+natumeserver.o: natumeserver.c natumeserver.h canna.h sig.h
+sig.o: sig.h

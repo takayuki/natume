@@ -1,0 +1,372 @@
+なつめ -- Haskellによるかな漢字変換の実装 (version 0.11)
+INSTALL
+
+目次
+1 コンパイルに必要な環境
+  1.1 GHC (The Glasgow Haskell Compiler)
+  1.2 GCC & make
+  1.3 テスト
+2 コンパイル
+  2.1 configure & make
+  2.2 make install
+3 起動 & 停止
+  3.1 cannaserverを停止する
+  3.2 natumeserverを起動する
+  3.3 natumeserverを停止する
+4 セキュリティ
+  4.1 個人情報
+  4.2 アクセス制御
+  4.3 Canna由来の問題
+5 クライアント
+  5.1 動作が確認されているクライアント
+  5.2 (たぶん)動作しないクライアント
+6 ユーザー辞書
+  6.1 辞書のフォーマット
+  6.2 辞書の更新
+  6.3 ヒント
+
+※バイナリパッケージを利用する場合
+
+1と2は飛ばしてもかまいません。3から読んでください。
+
+
+1. コンパイルに必要な環境
+
+なつめをコンパイルするためには、
+あなたの環境につぎのソフトウェアが準備されている必要があります。
+
+  1.1 GHC (The Glasgow Haskell Compiler)
+
+    http://www.haskell.org/ghc/
+    http://www.haskell.org/ghc/download.html
+
+    何はともあれ、Haskellコンパイラが必要です。
+    (動作確認済み: GHC version 6.4, 6.4.1, 6.4.2, 6.6)
+
+    Haskellの言語処理系はいくつか存在しますが、
+    GHC以外の処理系では、動作を確認していません。
+
+    上のページには、さまざまなプラットホームに対して、
+    バイナリパッケージが用意されているので、できるだけそれを利用しましょう。
+
+    もしあなたが、「なんでもコンパイルしてやる」という姿勢の持ち主でも、
+    今回だけは、バイナリパッケージのお世話になりましょう。
+
+    なぜなら、GHCそのものも、GHCで書かれているからです。
+    卵と鶏の関係に陥らないために、
+    すくなくとも最初だけはバイナリパッケージを使いましょう。
+
+    ※NetBSDの利用者の方々ヘ
+      NetBSDのpkgにGHCが用意されています。
+
+      ftp://ftp.netbsd.org/pub/NetBSD/packages/pkgsrc/lang/ghc/README.html
+
+      わたしは、NetBSD 2.0とpkgからインストールしたghc 6.4で
+      この「なつめ」を書きました。
+
+  1.2 GCC & make
+
+    ほとんどの環境にインストールされていると思うので、
+    詳しい説明は割愛します。makeは、BSDでもGNUでも使えます。
+
+  1.3 テスト
+
+    もし、はじめてHaskellを使うのであれば、ここで簡単なプログラムを
+    コンパイルしてみましょう。Hello.hsというファイルのなかに、
+
+    main = putStrLn "Hello World"
+
+    この一行だけを書いておきます。
+
+    $ cat Hello.hs 
+    main = putStrLn "Hello World"
+    $ ghc -O2 -o hello Hello.hs 
+    $ ./hello 
+    Hello World
+
+   このように動けば問題ありません。
+
+   (参考)
+     Haskell
+     http://www.haskell.org/
+     本家。
+
+     Wikipedia - Haskell
+     http://ja.wikipedia.org/wiki/Haskell
+     簡単な説明ならここ。
+
+     Programming in Haskell
+     http://www.sampou.org/cgi-bin/haskell.cgi
+     日本語で読める数少ないサイト。翻訳文書あり。
+
+2. コンパイル
+
+  2.1 configure & make
+
+    $ tar ztvf natume-0.1.tar.gz
+    $ cd natume-0.1
+    $ ./configure
+    $ make
+
+    5〜10分くらい待つかもしれません。ここで辞書も作成します。
+
+    GHCは、高速に実行可能なバイナリを生成しますが、
+    コンパイルそのものには、やや時間のかかる傾向があります。
+
+  2.2 make install
+
+    # make install   ←ここはrootで作業してください。
+
+    以下のファイルがインストールされます。
+
+      /usr/local/bin/natume               バックエンド
+      /usr/local/bin/initnatume           初期化スクリプト
+      /usr/local/bin/mknadic              辞書作成ツール
+      /usr/local/libexec/natume/natume    バックエンド(本体)
+      /usr/local/sbin/natumeserver        サーバ
+      /usr/local/share/natume/User.dic
+      /usr/local/share/natume/connect.dat
+      /usr/local/share/natume/connect.idx
+      /usr/local/share/natume/ipadic.dat
+      /usr/local/share/natume/ipadic.idx
+      /usr/local/share/natume/ipadic.sta
+      /usr/local/share/natume/extdic.dat
+      /usr/local/share/natume/extdic.idx
+      /usr/local/share/natume/extdic.sta
+      /usr/local/share/natume/user.dat
+      /usr/local/share/natume/user.idx
+      /usr/local/share/natume/user.sta
+
+
+3. 起動 & 停止
+
+  3.1 cannaserverを停止する
+
+    ※cannaserverとnatumeserverは同時に使用できません。
+      まずはじめに、cannaserverを停止してください。
+
+    停止の方法は、環境によってさまざまですが....
+    
+    # /etc/rc.d/canna stop
+    # /etc/rc.d/init.d/canna stop
+    # cannakill
+
+    それから、cannaserverの残したディレクトリを削除しておきます。
+
+    # rm -rf /tmp/.iroha_unix
+
+  3.2 初期化
+
+    natumeを利用するユーザーごとにinitnatumeを実行して、ホームディレクトリに
+    .natumeディレクトリを作成します。
+
+    $ initnatume
+
+    ~/.natumeディレクトリには、ユーザー辞書、学習情報などが保存されます。
+
+    特に、.natume/allowは、アクセス制御に関する大切なディレクトリです。
+    詳しくは、4. セキュリティを参照してください。
+
+    $ ls .natume/allow/
+    127.0.0.1 unix
+
+    ※インストール時だけでなく、バージョンアップ時にも、
+      initnatumeを実行する必要があります。
+
+      なつめは辞書と学習情報を別々に管理しています。たとえば、
+
+        /usr/local/share/natume/ipadic.dat  データ
+        /usr/local/share/natume/ipadic.idx  インデックス
+        ~/.natume/ipadic.sta                学習情報 
+
+      辞書データと学習情報の不一致を防ぐために、
+      initnatumeは、古い辞書に関する学習情報をクリアします。
+      (このあたりは自動的に処理されるようにすべきなのですが....)
+
+
+  3.3 natumeserverを起動する
+
+    ここで、２つのモードを選択できます。
+
+    もし、あなたひとりだけがnatumeserverを使うのであれば、
+    あなた自身のユーザー権限で、natumeserverを起動することができます。
+    (これをユーザーモードと呼ぶことにします)
+
+    $ /usr/local/sbin/natumeserver [-i]
+
+    ※なつめでは、可能な限りこのモードを使うことを推奨します。
+
+    もし、複数のユーザーがnatumeserverを使うのであれば、
+    root権限でnatumeserverを起動する必要があります。
+    (これを管理者モードと呼ぶことにします)
+
+    # /usr/local/sbin/natumeserver [-i]
+
+    いずれにしても、cannaserverと同じ場所に、UNIXドメインソケットが作成
+    されます。そのため、cannaserverとnatumeserverは同時に起動できません。
+
+      /tmp/.iroha_unix/IROHA
+
+    どちらの方法を選択したかによって、ソケットファイルのオーナーが異なる
+    ことになります。
+
+    ※TCP経由の接続が必要な場合には、-iオプションが必要です。
+      また、4. セキュリティを参照しながら、
+      明示的に接続を許可する必要があるでしょう。
+
+  3.4 natumeserverを停止する
+
+    TERMシグナルを送ると停止します。
+
+    $ kill <pid of natumeserver>
+    # kill <pid of natumeserver> 管理者モードで起動した場合
+
+
+4. セキュリティ
+
+  4.1 個人情報
+
+    なつめは、ユーザー定義辞書、学習情報など、個人情報と考えられるものは、
+    すべて各ユーザーのホームディレクトリに保存します。
+
+      ~/.natume/
+
+    これは、natumeserverをどちらのモードで起動していても同じです。
+
+    natumeserverは、クライアントから送られてきたユーザー名を
+    /etc/passwdから見つけ出そうとします。
+
+    指示されたユーザーが/etc/passwdに存在する場合にだけ、
+    対応するUIDでなつめのバックエンドプログラムを起動します。
+
+  4.2 アクセス制御
+
+    natumeserverは、明示的に許可されたアドレスからのみ接続を許可します。
+    許可/不許可は、接続元に対応したファイルの有無で判断します。
+    (ファイルの中身は関係ありません)
+
+    initnatumeを実行したときに、デフォルトとしてつぎの２つのファイルが作成
+    されています。
+
+      ~/.natume/access/unix
+      ~/.natume/access/127.0.0.1
+
+    このファイルが存在することで、UNIXドメインソケットおよび127.0.0.1からの
+    TCP接続が許可されます。
+
+    そのほかのアドレスから接続したい場合には、
+    IPアドレスをファイル名とする空のファイルを作成してください。
+
+    (例)
+      $ touch ~/.natume/access/192.168.1.2
+
+    もちろん、ファイルを削除すれば再び接続を拒否できます。
+
+
+  4.3 Canna由来の問題
+
+    Cannaプロトコルに認証はありません。
+
+    4.1で、「クライアントから送られてきたユーザー名」と書きましたが、
+    これもあくまで自己申告なのです。
+    natumeserverに２つのモードを導入したのは、
+    このあたりの危険性をすこしでも軽減するための苦肉の策です。
+
+
+5. クライアント
+
+  5.1 動作が確認されているクライアント
+
+    なつめは、Canna互換プロトコルを実装しているので、
+    ほとんどのCannaクライアントは、そのままnatumeserverに接続できます。
+    以下、確認できているものです。
+
+    5.1.1 emcws - http://emacs-21.ki.nu/
+
+      いまこの文書もこれで書いているので大丈夫そう。
+      (註: その後、わたしはycに移行してしまいました)
+
+    5.1.2 uim - http://anthy.sourceforge.jp/cgi-bin/hikija/hiki.cgi
+
+      Mozillaへの入力にはこれを使っているのでたぶん大丈夫。
+
+    5.1.3 kinput2
+
+      ちょっとだけ使ってみた。とりあえず変換できたので大丈夫だと思う。
+
+    5.1.4 yc - http://www.ceres.dti.ne.jp/~knak/yc.html
+
+      大丈夫。
+
+      ycの場合には、わざわざnatumeserverを起動しなくても、
+      直接、バックエンドプロセスを起動する方法が使えます。
+
+        (setq yc-icanna-path "natume")
+        (load-library "yc")
+
+     セキュリティの点では、これが正しい戦略です。
+
+    5.1.5 Tamago 4+Canna patch - http://cgi18.plala.or.jp/~nyy/canna/
+
+      大丈夫そう。残念ながら、豊富な辞書関連の機能は使えません。
+
+
+  5.2 (たぶん)動作しないクライアント
+
+    なつめはCanna互換をうたっていますが、実装されているのは、Cannaプロトコル
+    仕様書で定義されているコマンドのなかで、一般的によく使われそうな部分だけ
+    です。
+
+    特に、辞書に関しては、品詞体系もデータ構造もまったく異なるので、
+    Canna用の辞書管理ツールなどは、まだ当分の間使えないでしょう。
+
+    5.1であげたクライアントでも、辞書に関する実質的な操作はできません。
+    正常に動作させるためにダミーの処理を用意した部分もありますが、
+    いまのところなつめでは何もしていません。
+
+    ユーザー辞書については、6. ユーザー辞書を参照してください。
+
+6. ユーザー辞書
+
+  6.1 辞書のフォーマット
+
+    ipadicと同じフォーマットを使用してユーザー専用の辞書を追加できます。
+    品詞体系やファイルフォーマットの詳細は、ipadicのユーザーズマニュアルを
+    参照してください。
+
+    ipadic 2.7.0 ユーザーズマニュアル
+    ipadic-2.7.0/doc/ipadic-ja.pdf
+
+  6.2 辞書の更新
+
+    initnatumeを実行するとサンプルが~/.natumeにインストールされています。
+
+      ~/.natume/User.dic
+
+    User.dicを適当に編集したうえで、mknadicを実行すると辞書が更新されます。
+
+    ※この作業は、なつめを使用しているアプリケーションを
+      すべて停止してから行った方がよいでしょう。
+
+      $ cd ~/.natume/
+      $ mknadic
+
+    mknadicはUser.dicからつぎのファイルを作成します。
+    なつめはこれらのファイルを自動的にユーザー辞書として認識します。
+
+      ~/.natume/user.dat  データ
+      ~/.natume/user.idx  インデックス
+      ~/.natume/user.sta  学習情報
+
+  6.3 ヒント
+
+    ipadicのマニュアルにひるんではいけません!!
+
+    はじめは、ipadicに含まれている辞書(ipadic-2.7.0/Noun.dicなど)をながめて
+    みましょう。そこから似たような単語のエントリーをぬきだして変更してやれば
+    ほとんどの場合はうまく行きます。
+    
+    品詞の分類にあまり神経質になる必要はありません。コストも適当に割り当てて
+    かまいません。なつめの学習機能がなんとかしてくれます。
+    (自分で登録した単語は頻繁に使うでしょう？)
+
