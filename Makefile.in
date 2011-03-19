@@ -31,7 +31,7 @@ LDFLAGS = -L. @LDFLAGS@
 LIBS = -lna @LIBS@
 AR = @AR@
 GHC = @GHC@
-GHC_OPTS = -F -pgmF ./h98safe -O2 -Wall -ffi -funbox-strict-fields $(LDFLAGS) $(LIBS)
+GHC_OPTS = -F -pgmF ./h98safe -O2 -Wall -fno-warn-unused-do-bind -funbox-strict-fields -XForeignFunctionInterface $(LDFLAGS) $(LIBS)
 INSTALL = @INSTALL@
 IPADIC = ./ipadic-2.7.0
 CANNADIC = ./cannadic-0.95c
@@ -81,7 +81,7 @@ install:
 	  ${INSTALL} -m 644 $$i ${datadir}/natume; done
 
 clean:
-	rm -f h98safe compile mknadic mknacon
+	rm -f h98safe compile mknadic mknacon impcadic
 	rm -f natume natumeserver
 	rm -f natume.sh initnatume.sh 
 	rm -f libna.a

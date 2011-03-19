@@ -20,7 +20,6 @@ module Main where
 
 import System.IO
 import Char
-import Monad
 import System
 import qualified Config
 import Getopt

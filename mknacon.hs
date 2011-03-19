@@ -21,7 +21,6 @@ module Main where
 import Prelude hiding (id)
 import CString
 import Foreign
-import IO
 import Monad
 import System
 import qualified Config

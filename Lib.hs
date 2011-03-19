@@ -30,7 +30,6 @@ module Lib (
 import CString
 import CTypes
 import Foreign
-import Ptr
 
 foreign import ccall "static connect.h connect_init"
   connect_init :: CString -> CString -> IO Int

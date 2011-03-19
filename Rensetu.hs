@@ -23,8 +23,6 @@ module Rensetu (
   ) where
 
 import Prelude hiding (id)
-import IO
-import List
 import qualified Connect
 import qualified Hinsi
 import qualified KForm

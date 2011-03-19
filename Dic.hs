@@ -26,8 +26,6 @@ import Prelude hiding (id,last)
 import CTypes
 import CString
 import Foreign
-import IO
-import Ptr
 import System
 import Compile (rensetu_tbl2)
 import qualified Config

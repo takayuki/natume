@@ -21,8 +21,6 @@ module Convert (
   ) where
 
 import Prelude hiding (id,last)
-import IO
-import Monad
 import qualified List
 import Con
 import Dic

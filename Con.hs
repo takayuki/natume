@@ -21,11 +21,9 @@ module Con (
   ) where
 
 import Prelude hiding (id,last)
-import IO
 import CString
 import CTypes
 import Foreign
-import Ptr
 import qualified Lib
 
 type Con = (Int,(Ptr CInt),(Ptr CInt))

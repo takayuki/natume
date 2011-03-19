@@ -23,8 +23,6 @@ module Session (
   ) where
 
 import Prelude hiding (id)
-import IO
-import qualified List
 import Convert
 import Con
 import Dic

@@ -18,8 +18,6 @@
  --}
 module Main where
 
-import IO
-import Monad
 import System
 import qualified Config
 import qualified Hinsi

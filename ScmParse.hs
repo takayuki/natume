@@ -26,10 +26,8 @@ module ScmParse (
     parse,pp
   ) where
 
-import Char
 import Parser
 import ScmToken
-import System.IO
 
 data Expr = ExprInt Int
           | ExprName String

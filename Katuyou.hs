@@ -20,7 +20,6 @@ module Katuyou (
     typeform,readtypeform,pp,fmt0,fmt1
   ) where
 
-import IO
 import qualified KForm
 import qualified KType
 
