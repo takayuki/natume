@@ -50,11 +50,11 @@ alloc2 w h = do p <- mallocArray h
                 pokeArray p q
                 return p
              where
-             chunk _ 0     = return []
-             chunk s (n+1) = do x <- mallocArray s
-                                xs <- chunk s n
-                                return (x:xs)
-             chunk _ _     = return []
+             chunk _ 0 = return []
+             chunk s n = do x <- mallocArray s
+                            xs <- chunk s (n-1)
+                            return (x:xs)
+             chunk _ _ = return []
 
 poke2 :: (Ptr CString) -> [String] -> IO Int
 poke2 buf2 = foldM (\n x -> do newCString x >>= pokeElemOff buf2 n
