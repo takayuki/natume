@@ -17,6 +17,7 @@
  --  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  --}
 module Lib (
+    castInt,cint,call,
     connect_init,connect_free,connect_start,connect_stop,
     connect_add,connect_build,connect_load,connect_unload,
     connect_search,connect_fetch,connect_dump,
@@ -24,79 +25,89 @@ module Lib (
     dic_load,dic_unload,dic_update,dic_insert,
     dic_search,dic_fetch,dic_dump,
     canna_init,canna_free,canna_accept,canna_establish,
-    canna_request,canna_response
+    canna_request,canna_response,
   ) where
 
 import CString
 import CTypes
 import Foreign
 
+castInt :: (Integral a, Integral b) => a -> b
+castInt = fromInteger . toInteger
+
+cint :: Int -> CInt
+cint = castInt
+
+call :: IO CInt -> IO Int
+call x = x >>= (return . castInt)
+
 foreign import ccall "static connect.h connect_init"
-  connect_init :: CString -> CString -> IO Int
+  connect_init :: CString -> CString -> IO CInt
 foreign import ccall "static connect.h connect_free"
-  connect_free :: Int -> IO ()
+  connect_free :: CInt -> IO ()
 foreign import ccall "static connect.h connect_start"
-  connect_start :: Int -> IO Int
+  connect_start :: CInt -> IO CInt
 foreign import ccall "static connect.h connect_stop"
-  connect_stop :: Int -> IO ()
+  connect_stop :: CInt -> IO ()
 foreign import ccall "static connect.h connect_add"
-  connect_add :: Int -> (Ptr CInt) -> Int -> Int -> IO Int
+  connect_add :: CInt -> (Ptr CInt) -> CInt -> CInt -> IO CInt
 foreign import ccall "static connect.h connect_build"
-  connect_build :: Int -> IO Int
+  connect_build :: CInt -> IO CInt
 foreign import ccall "static connect.h connect_load"
-  connect_load :: Int -> IO Int
+  connect_load :: CInt -> IO CInt
 foreign import ccall "static connect.h connect_unload"
-  connect_unload :: Int -> IO ()
+  connect_unload :: CInt -> IO ()
 foreign import ccall "static connect.h connect_search"
-  connect_search :: Int -> (Ptr CInt) -> Int -> IO Int
+  connect_search :: CInt -> (Ptr CInt) -> CInt -> IO CInt
 foreign import ccall "static connect.h connect_fetch"
-  connect_fetch :: Int -> Int -> (Ptr CInt) -> Int -> (Ptr CInt) -> IO Int
+  connect_fetch :: CInt -> CInt -> (Ptr CInt) -> CInt -> (Ptr CInt) -> IO CInt
 foreign import ccall "static connect.h connect_dump"
-  connect_dump :: Int -> IO ()
+  connect_dump :: CInt -> IO ()
 
 foreign import ccall "static dic.h dic_init"
-  dic_init :: CString -> CString -> CString -> CString -> IO Int
+  dic_init :: CString -> CString -> CString -> CString -> IO CInt
 foreign import ccall "static dic.h dic_free"
-  dic_free :: Int -> IO ()
+  dic_free :: CInt -> IO ()
 foreign import ccall "static dic.h dic_start"
-  dic_start :: Int -> IO Int
+  dic_start :: CInt -> IO CInt
 foreign import ccall "static dic.h dic_stop"
-  dic_stop :: Int -> IO ()
+  dic_stop :: CInt -> IO ()
 foreign import ccall "static dic.h dic_add"
-  dic_add :: Int -> CString -> CString -> Int -> Int -> Int -> IO Int
+  dic_add :: CInt -> CString -> CString -> CInt -> CInt -> CInt -> IO CInt
 foreign import ccall "static dic.h dic_build"
-  dic_build :: Int -> IO Int
+  dic_build :: CInt -> IO CInt
 foreign import ccall "static dic.h dic_load"
-  dic_load :: Int -> IO Int
+  dic_load :: CInt -> IO CInt
 foreign import ccall "static dic.h dic_unload"
-  dic_unload :: Int -> IO ()
+  dic_unload :: CInt -> IO ()
 foreign import ccall "static dic.h dic_update"
-  dic_update :: Int -> Int -> Int -> IO Int
+  dic_update :: CInt -> CInt -> CInt -> IO CInt
 foreign import ccall "static dic.h dic_insert"
-  dic_insert :: Int -> CString -> CString -> Int -> Int -> Int -> IO Int
+  dic_insert :: CInt -> CString -> CString -> CInt -> CInt -> CInt -> IO CInt
 foreign import ccall "static dic.h dic_search"
-  dic_search :: Int -> CString -> Int -> IO Int
+  dic_search :: CInt -> CString -> CInt -> IO CInt
 foreign import ccall "static dic.h dic_fetch"
-  dic_fetch :: Int -> Int -> (Ptr CString) -> (Ptr CString) ->
-               (Ptr CInt) -> (Ptr CInt) ->
-               (Ptr CInt) -> (Ptr CInt) -> (Ptr CInt) -> Int -> Int -> IO Int
+  dic_fetch :: CInt -> CInt -> (Ptr CString) -> (Ptr CString) ->
+             (Ptr CInt) -> (Ptr CInt) ->
+             (Ptr CInt) -> (Ptr CInt) -> (Ptr CInt) -> CInt -> CInt -> IO CInt
 foreign import ccall "static dic.h dic_dump"
-  dic_dump :: Int -> IO ()
+  dic_dump :: CInt -> IO ()
 
 foreign import ccall "static canna.h canna_init"
-  canna_init :: CString -> Int -> Int -> Int -> IO Int
+  canna_init :: CString -> CInt -> CInt -> CInt -> IO CInt
 foreign import ccall "static canna.h canna_free"
-  canna_free :: Int -> IO ()
+  canna_free :: CInt -> IO ()
 foreign import ccall "static canna.h canna_accept"
-  canna_accept :: Int -> (Ptr CInt) -> (Ptr CInt) ->
-                  (Ptr CInt) -> CString -> Int -> IO Int
+  canna_accept :: CInt -> (Ptr CInt) -> (Ptr CInt) ->
+                  (Ptr CInt) -> CString -> CInt -> IO CInt
 foreign import ccall "static canna.h canna_establish"
-  canna_establish :: Int -> (Ptr CInt) -> (Ptr CInt) ->
-                     (Ptr CInt) -> (Ptr CInt) -> IO Int
+  canna_establish :: CInt -> (Ptr CInt) -> (Ptr CInt) ->
+                     (Ptr CInt) -> (Ptr CInt) -> IO CInt
 foreign import ccall "static canna.h canna_request"
-  canna_request :: Int -> (Ptr CInt) -> (Ptr CInt) -> (Ptr CInt) ->
-              (Ptr CInt) -> (Ptr CInt) -> (Ptr CInt) -> CString -> Int -> IO Int
+  canna_request :: CInt -> (Ptr CInt) -> (Ptr CInt) -> (Ptr CInt) ->
+    (Ptr CInt) -> (Ptr CInt) -> (Ptr CInt) -> CString -> CInt -> IO CInt
+              
 foreign import ccall "static canna.h canna_response"
-  canna_response :: Int -> (Ptr CInt) -> (Ptr CInt) -> (Ptr CInt) ->
-                (Ptr CInt) -> (Ptr CInt) -> (Ptr CInt) -> (Ptr CString) -> IO Int
+  canna_response :: CInt -> (Ptr CInt) -> (Ptr CInt) -> (Ptr CInt) ->
+    (Ptr CInt) -> (Ptr CInt) -> (Ptr CInt) -> (Ptr CString) -> IO CInt
 

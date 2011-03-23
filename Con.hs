@@ -25,6 +25,7 @@ import CString
 import CTypes
 import Foreign
 import qualified Lib
+import Lib (castInt,cint,call)
 
 type Con = (Int,(Ptr CInt),(Ptr CInt))
 
@@ -35,11 +36,11 @@ connect_init :: String -> String -> IO Con
 connect_init idx dat =
   do cidx <- newCString idx
      cdat <- newCString dat
-     id <- Lib.connect_init cidx cdat
+     id <- call (Lib.connect_init cidx cdat)
      if id == -1
        then error "unable to initialize external library"
        else return ()
-     status <- Lib.connect_load id
+     status <- call (Lib.connect_load (cint id))
      if status == -1
        then error ("unable to load connection rule: " ++
                    idx ++ "," ++ dat)
@@ -54,17 +55,19 @@ fetch1 :: Con -> Int -> Int -> IO [([Int],Int)]
 fetch1 con i n =
   let (id,rule,cost) = con in
     if i < n
-    then do num <- Lib.connect_fetch id i rule width cost
+    then do num <- call (Lib.connect_fetch (cint id) (cint i) rule
+                          (cint width) cost)
             r <- peekArray num rule
             c <- peek cost
             fs <- fetch1 con (i+1) n
-            return ((map (fromInteger . toInteger) r,(fromInteger $ toInteger c)):fs)
+            return ((map castInt r,castInt c):fs)
     else return []
 
 connect_search :: Con -> [Int] -> IO [([Int],Int)]
 connect_search con key = let (id,_,_) = con in
-                           do rule <- newArray (map (fromInteger . toInteger) key)
-                              num <- Lib.connect_search id rule (length key)
+                           do rule <- newArray (map castInt key)
+                              num <- call (Lib.connect_search (cint id) rule
+                                       (cint (length key)))
                               ret <- fetch1 con 0 num
                               free rule
                               return ret
@@ -73,6 +76,6 @@ connect_free :: Con -> IO ()
 connect_free con = let (id,rule,cost) = con in
                      do free rule
                         free cost
-                        Lib.connect_unload id
-                        Lib.connect_free id
+                        Lib.connect_unload (cint id)
+                        Lib.connect_free (cint id)
                         return ()

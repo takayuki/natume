@@ -31,6 +31,7 @@ import Compile (rensetu_tbl2)
 import qualified Config
 import qualified Lib
 import qualified Rensetu
+import Lib (castInt,cint,call)
 
 type Dic = (Int,(Ptr CString),(Ptr CString),
             (Ptr CInt),(Ptr CInt),(Ptr CInt),(Ptr CInt),(Ptr CInt))
@@ -59,21 +60,21 @@ strange = rensetu ["名詞","サ変接続"]
 width,height :: Int
 (width,height) = (64,1024)
 
-alloc2 :: (Storable a) => Int -> Int -> IO (Ptr (Ptr a))
-alloc2 w h = do p <- mallocArray h
-                q <- chunk w h
-                pokeArray p q
-                return p
+malloc2 :: (Storable a) => Int -> Int -> IO (Ptr (Ptr a))
+malloc2 w h = do p <- mallocArray h
+                 q <- chunk w h
+                 pokeArray p q
+                 return p
              where
              chunk _ 0 = return []
              chunk s n = do x <- mallocArray s
                             xs <- chunk s (n-1)
                             return (x:xs)
 
-unalloc2 :: (Storable a) => (Ptr (Ptr a)) -> IO ()
-unalloc2 pp = do p <- peekArray height pp
-                 mapM_ free p
-                 free pp
+free2 :: (Storable a) => (Ptr (Ptr a)) -> IO ()
+free2 pp = do p <- peekArray height pp
+              mapM_ free p
+              free pp
 
 newpath :: String -> IO CString
 newpath x = if (head x) == '/'
@@ -87,15 +88,15 @@ dic_init idx dat sta =
   do cidx <- newpath idx
      cdat <- newpath dat
      csta <- newpath sta
-     id <- Lib.dic_init cidx cdat csta nullPtr
+     id <- call (Lib.dic_init cidx cdat csta nullPtr)
      if id == -1
        then error idx -- return []
        else
-         do status <- Lib.dic_load id
+         do status <- call (Lib.dic_load (cint id))
             if status == -1
               then return []
-              else do yomi  <- alloc2 width height
-                      word  <- alloc2 width height
+              else do yomi  <- malloc2 width height
+                      word  <- malloc2 width height
                       table <- mallocArray height
                       cost  <- mallocArray height
                       point <- mallocArray height
@@ -107,7 +108,7 @@ dic_init idx dat sta =
                       return [(id,yomi,word,table,cost,point,style,last)]
 
 peekCInt :: CInt -> IO Int
-peekCInt = return . fromInteger . toInteger
+peekCInt = return . castInt
 
 fetch2 :: Dic -> Int -> Int -> IO [Mrph]
 fetch2 dic i num =
@@ -129,8 +130,8 @@ fetch1 :: Dic -> Int -> Int -> IO [Mrph]
 fetch1 dic i num =
   let (id,yomi,word,table,cost,point,style,last) = dic in
     if i < num
-    then do num' <- Lib.dic_fetch id i yomi word table cost
-                                  point style last width height
+    then do num' <- call (Lib.dic_fetch (cint id) (cint i) yomi word table cost
+                            point style last (cint width) (cint height))
             fs <- fetch2 dic 0 num'
             gs <- fetch1 dic (i+1) num
             return (fs ++ gs)
@@ -140,21 +141,22 @@ dic_search :: Dic -> String -> Int -> IO [Mrph]
 dic_search dic key exact =
   let (id,_,_,_,_,_,_,_) = dic in
     do ckey <- newCString key
-       num <- Lib.dic_search id ckey exact
+       num <- call (Lib.dic_search (cint id) ckey (cint exact))
        ret <- fetch1 dic 0 num
        free ckey
        return ret
 
 dic_update :: Dic -> Int -> Int -> IO Int
 dic_update dic pnt stl = let (id,_,_,_,_,_,_,_) = dic in
-                           Lib.dic_update id pnt stl
+                         call (Lib.dic_update (cint id) (cint pnt) (cint stl))
 
 dic_insert :: Dic -> String -> String -> Int -> Int -> Int -> IO Int
 dic_insert dic y w tbl cst stl =
   let (id,_,_,_,_,_,_,_) = dic in
     do yomi <- newCString y
        word <- newCString w
-       status <- Lib.dic_insert id yomi word tbl cst stl
+       status <- call (Lib.dic_insert (cint id) yomi word (cint tbl)
+                         (cint cst) (cint stl))
        free word
        free yomi
        return status
@@ -162,14 +164,14 @@ dic_insert dic y w tbl cst stl =
 dic_free :: Dic -> IO ()
 dic_free dic =
   let (id,yomi,word,table,cost,point,style,last) = dic in
-    do unalloc2 yomi
-       unalloc2 word
+    do free2 yomi
+       free2 word
        free table
        free cost
        free point
        free style
        free last
-       Lib.dic_unload id
-       Lib.dic_free id
+       Lib.dic_unload (cint id)
+       Lib.dic_free (cint id)
        return ()
 

@@ -40,30 +40,31 @@ mainDo :: (String,String) -> IO ()
 mainDo (base,dir) =
   do idx <- newCString (base ++ ".idx")
      dat <- newCString (base ++ ".dat")
-     id <- connect_init idx dat
+     id <- call (connect_init idx dat)
      if id == -1
        then error "unable to initialize external library"
        else return ()
-     status <- connect_start id
+     status <- connect_start (cint id)
      if status == -1
        then error "unable to initialize dictionary"
        else return ()
      cs <- Connect.readconn (dir ++ Config.pathsep ++ "connect.cha")
      foldM (\n (connect,cost) ->
-              do key <- newArray0 0 (map (fromInteger . toInteger) (reverse connect))
-                 status' <- connect_add id key (length connect) cost
+              do key <- newArray0 0 (map castInt (reverse connect))
+                 status' <- call (connect_add (cint id) key
+                                  (cint (length connect)) (cint cost))
                  if status' == -1
                    then error "unable to register rule in dictonary"
                    else return (n+1)
            ) (1::Int) (filter ((2<=).length.fst)
                               (Rensetu.convert cs
                                (rensetu_tbl1 ++ rensetu_tbl2)))
-     connect_stop id
-     status' <- connect_build id
+     connect_stop (cint id)
+     status' <- call (connect_build (cint id))
      if status' == -1
        then error "unable to build dictionary successfully"
        else return ()
-     connect_free id
+     connect_free (cint id)
      return ()
 
 mainOpts :: ([Opt],[String]) -> (String,String) -> IO ()

@@ -74,7 +74,6 @@ flush(canna_server* s)
   while (done < size) {
     status = write(s->out,p+done,size-done);
     if (status == -1) {
-      perror("write");
       return -1;
     }
     if (status == 0)
@@ -92,7 +91,6 @@ retr(canna_server* s,void* p,int size)
   while (done < size) {
     status = read(s->in,p+done,size-done);
     if (status == -1) {
-      perror("read");
       return -1;
     }
     if (status == 0)
@@ -286,8 +284,7 @@ canna_establish(int id,int* major,int* minor,int* cxt,int* aux0)
     if (emit(svr,&res.ok.min,2)) return -1;
     if (emit(svr,&res.ok.cxt,2)) return -1;
   }
-  flush(svr);
-  return 0;
+  return flush(svr);
 }
 
 
@@ -551,8 +548,7 @@ response_type2(int id,int major,int minor,int data)
   if (emit(svr,&res.min,1)) return -1;
   if (emit(svr,&res.size,2)) return -1;
   if (emit(svr,&res.data,1)) return -1;
-  flush(svr);
-  return 0;
+  return flush(svr);
 }
 
 int
@@ -602,8 +598,7 @@ response_type3(int id,int major,int minor,int stat,char** buf,int bufsize)
     if (emit(svr,res.data,size)) return -1;
     free(res.data);
   }
-  flush(svr);
-  return 0;
+  return flush(svr);
 }
 
 int
@@ -644,8 +639,7 @@ response_type4(int id,int major,int minor,int idx,int cand,int num)
     if (emit(svr,&res.stat,1)) return -1;
     if (emit(svr,res.data,28)) return -1;
   }
-  flush(svr);
-  return 0;
+  return flush(svr);
 }
 
 int
@@ -663,8 +657,7 @@ response_type5(int id,int major,int minor,int data)
   if (emit(svr,&res.min,1)) return -1;
   if (emit(svr,&res.size,2)) return -1;
   if (emit(svr,&res.data,2)) return -1;
-  flush(svr);
-  return 0;
+  return flush(svr);
 }
 
 int
@@ -712,8 +705,7 @@ response_type6(int id,int major,int minor,int num,char** buf,int bufsize)
     if (emit(svr,res.data,size)) return -1;
     free(res.data);
   }
-  flush(svr);
-  return 0;
+  return flush(svr);
 }
 
 int
@@ -763,8 +755,7 @@ response_type7(int id,int major,int minor,int num,char** buf,int bufsize)
     if (emit(svr,res.data,size)) return -1;
     free(res.data);
   }
-  flush(svr);
-  return 0;
+  return flush(svr);
 }
 
 int
@@ -782,8 +773,7 @@ response_type9(int id,int major,int minor,int num)
   if (emit(svr,&res.min,1)) return -1;
   if (emit(svr,&res.size,2)) return -1;
   if (emit(svr,&res.num,2)) return -1;
-  flush(svr);
-  return 0;
+  return flush(svr);
 }
 
 int

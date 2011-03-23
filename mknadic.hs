@@ -44,7 +44,8 @@ readDics id start dir (x:xs) =
                   then return prev
                   else do yomi <- newCString (kata2hira y)
                           word <- newCString w
-                          status <- dic_add id yomi word table cost point
+                          status <- call (dic_add (cint id) yomi word
+                                      (cint table) (cint cost) (cint point))
                           if status == -1
                             then error "unable to register word in dictonary"
                             else return (point+1)
@@ -58,21 +59,21 @@ mainDo (base,dir,dics,_) =
      dat <- newCString (base ++ ".dat")
      sta <- newCString (base ++ ".sta")
      tmp <- newCString (base ++ ".tmp")
-     id <- dic_init idx dat sta tmp
+     id <- call (dic_init idx dat sta tmp)
      if id == -1
        then error "unable to initialize external library"
        else return ()
-     status <- dic_start id
+     status <- dic_start (cint id)
      if status == -1
        then error "unable to initialize dictionary"
        else return ()
      readDics id 1 dir dics
-     dic_stop id
-     status' <- dic_build id
+     dic_stop (cint id)
+     status' <- call (dic_build (cint id))
      if status' == -1
        then error "unable to build dictionary successfully"
        else return ()
-     dic_free id
+     dic_free (cint id)
      return ()
 
 mainOpts :: ([Opt],[String]) -> (String,String,[String]) -> IO ()

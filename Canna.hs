@@ -30,6 +30,7 @@ import Dic
 import Re
 import Session
 import qualified Lib
+import Lib (castInt,cint,call)
 
 type Server = (Int,(Ptr CInt),(Ptr CInt),(Ptr CInt),
                (Ptr CInt),(Ptr CInt),(Ptr CInt),CString,(Ptr CString))
@@ -43,16 +44,16 @@ yomi (MkMrph y _ _ _ _ _ _ _) = y
 fst4 :: (a,b,c,d) -> a
 fst4 (x,_,_,_) = x
 
-alloc2 :: (Storable a) => Int -> Int -> IO (Ptr (Ptr a))
-alloc2 w h = do p <- mallocArray h
-                q <- chunk w h
-                pokeArray p q
-                return p
-             where
-             chunk s n = if 1 <= n then do x <- mallocArray s
-                                           xs <- chunk s (n-1)
-                                           return (x:xs)
-                                   else return []
+malloc2 :: (Storable a) => Int -> Int -> IO (Ptr (Ptr a))
+malloc2 w h = do p <- mallocArray h
+                 q <- chunk w h
+                 pokeArray p q
+                 return p
+              where
+              chunk s n = if 1 <= n then do x <- mallocArray s
+                                            xs <- chunk s (n-1)
+                                            return (x:xs)
+                                    else return []
 
 poke2 :: (Ptr CString) -> [String] -> IO Int
 poke2 buf2 = foldM (\n x -> do newCString x >>= pokeElemOff buf2 n
@@ -60,20 +61,20 @@ poke2 buf2 = foldM (\n x -> do newCString x >>= pokeElemOff buf2 n
                    (0 :: Int)
 
 peekCInt :: (Ptr CInt) -> IO Int
-peekCInt p = peek p >>= (return . fromInteger . toInteger)
+peekCInt p = peek p >>= (return . castInt)
 
 pokeCInt :: (Ptr CInt) -> Int -> IO ()
-pokeCInt x = poke x . fromInteger . toInteger
+pokeCInt x = poke x . castInt
 
-unalloc2 :: (Storable a) => (Ptr (Ptr a)) -> IO ()
-unalloc2 p = do q <- peekArray buf2height p
-                mapM_ free q
-                free p
+free2 :: (Storable a) => (Ptr (Ptr a)) -> IO ()
+free2 p = do q <- peekArray buf2height p
+             mapM_ free q
+             free p
 
 canna_init :: String -> Int -> IO Server
 canna_init socket mode =
   do cpath <- newCString socket
-     id <- Lib.canna_init cpath 0 1 mode
+     id <- call (Lib.canna_init cpath (cint 0) (cint 1) (cint mode))
      if id == -1
        then error "unable to initialize external library"
        else return ()
@@ -84,7 +85,7 @@ canna_init socket mode =
      aux1 <- malloc
      aux2 <- malloc
      buf  <- mallocArray bufsize
-     buf2 <- alloc2 buf2width buf2height
+     buf2 <- malloc2 buf2width buf2height
      free cpath
      return (id,maj,min,cxt,aux0,aux1,aux2,buf,buf2)
 
@@ -98,14 +99,15 @@ canna_free srv =
        free aux1
        free aux2
        free buf
-       unalloc2 buf2
-       Lib.canna_free id
+       free2 buf2
+       Lib.canna_free (cint id)
        return ()
 
 accept :: Server -> IO Int
 accept srv =
   let (id,maj,min,_,aux0,_,_,buf,_) = srv in
-    do status <- Lib.canna_accept id maj min aux0 buf bufsize
+    do status <- call (Lib.canna_accept (cint id) maj min aux0 buf
+                         (cint bufsize))
        return status
 
 establish :: Server -> Int -> IO Int
@@ -113,13 +115,14 @@ establish srv ack =
   let (id,maj,min,cxt,aux0,_,_,_,_) = srv in
     do pokeCInt cxt ack
        poke aux0 3
-       status <- Lib.canna_establish id maj min cxt aux0
+       status <- call (Lib.canna_establish (cint id) maj min cxt aux0)
        return status
 
 request :: Server -> IO Int
 request srv = 
   let (id,maj,min,cxt,aux0,aux1,aux2,buf,_) = srv in
-    do status <- Lib.canna_request id maj min cxt aux0 aux1 aux2 buf bufsize
+    do status <- call (Lib.canna_request (cint id) maj min cxt
+                         aux0 aux1 aux2 buf (cint bufsize))
        if status == -1
          then do canna_free srv
                  exitWith (ExitFailure 1)
@@ -129,7 +132,8 @@ request srv =
 response :: Server -> IO Int
 response srv = 
   let (id,maj,min,cxt,aux0,aux1,aux2,_,buf2) = srv in
-    do status <- Lib.canna_response id maj min cxt aux0 aux1 aux2 buf2
+    do status <- call (Lib.canna_response (cint id) maj min cxt
+                         aux0 aux1 aux2 buf2)
        if status == -1
          then do canna_free srv
                  exitWith (ExitFailure 1)
@@ -312,7 +316,7 @@ service s 0x10 0 =
                                 then dic_update (dics !! dic) pnt stl
                                 else return 0
                               return ())
-                    (zip (map (fromInteger . toInteger) final) (map head pause))
+                    (zip (map castInt final) (map head pause))
                 poke aux0 0
                 response srv
                 dispatch s
