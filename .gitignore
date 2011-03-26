@@ -1,0 +1,15 @@
+*.o
+*.a
+*.hi
+*.hs
+*.dic
+*.dat
+*.idx
+*.sta
+*.tmp
+config.*
+Makefile
+initnatume.sh
+natume.sh
+natumeserver.h
+.gdb_history
