@@ -39,10 +39,12 @@ README
 文字通り桁違いの時間と忍耐が必要とされたことは想像に難くありません。
 こちらの作業に携わってきた方々にも、重ねて感謝を申し上げます。
 
-version 0.3以降、cannadicも使わせていただいています。
+version 0.3以降、cannadicも使わせていただいていました。
 すぎもとまさおさんをはじめとするcannadicの開発者の方々、
 それから、cannadicに取り込まれている多くの辞書の編さんに関わった方々、
 ほんとうにありがとうございました。
+
+version 0.12以降、cannadic改を使わせていただいています。
 
 
 3. 著作権
@@ -59,11 +61,11 @@ cannadicは、すぎもとまさおさんが著作権を保持しています。
 詳しくは、この配布物に含まれているCOPYINGというファイルを参照してください。
 
 また、なつめはipadicを利用しています。したがって、なつめの利用者は、
-ipadicの使用条件も理解しておく必要があります。
-インストールをはじめる前に、必ずipadic-2.7.0/COPYINGを確認してください。
+ipadicの使用条件も理解しておく必要があります。インストールをはじめる前に、
+ipadic-2.7.0/COPYINGを確認してください。
 
-version 0.3から、cannadicも使い始めました。
-インストールをはじめる前に、必ずcannadic-0.95c/README.jaを確認してください。
+version 0.12から、cannadic改を使い始めました。インストールをはじめる前に、
+alt-cannadic-110208/README_euc.txtを確認してください。
 
 
 5. インストール
@@ -114,6 +116,7 @@ strscr at users dot sourceforge dot jp
 なつめ
 http://natume.sourceforge.jp/
 http://sourceforge.jp/projects/natume/
+https://github.com/takayuki/natume
 
 茶筌
 http://chasen.naist.jp/

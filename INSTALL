@@ -11,8 +11,10 @@ INSTALL
   2.2 make install
 3 起動 & 停止
   3.1 cannaserverを停止する
-  3.2 natumeserverを起動する
-  3.3 natumeserverを停止する
+  3.2 初期化
+  3.3 natumeserverを起動する
+  3.4 natumeserverを停止する
+  3.5 クライアント同時接続数 (注: eclipsなど)
 4 セキュリティ
   4.1 個人情報
   4.2 アクセス制御
@@ -38,10 +40,10 @@ INSTALL
   1.1 GHC (The Glasgow Haskell Compiler)
 
     http://www.haskell.org/ghc/
-    http://www.haskell.org/ghc/download.html
 
     何はともあれ、Haskellコンパイラが必要です。
-    (動作確認済み: GHC version 7.0.2)
+    (動作確認済み: GHC version 7.0.2 ※6.12.1以降なら問題ないと思いますが、
+     確認していません)
 
     Haskellの言語処理系はいくつか存在しますが、
     GHC以外の処理系では、動作を確認していません。
@@ -63,6 +65,14 @@ INSTALL
 
       わたしは、NetBSD 2.0とpkgからインストールしたghc 6.4で
       この「なつめ」を書きました。
+
+    ※Arch Linuxの利用者の方々ヘ
+      Extra RepositoryにGHCが用意されています。
+
+      http://www.archlinux.org/packages/extra/x86_64/ghc/
+
+      現在は、ここからインストールしたghc 7.0.2-1を使用しています。
+
 
   1.2 GCC & make
 
@@ -173,15 +183,15 @@ INSTALL
     ※インストール時だけでなく、バージョンアップ時にも、
       initnatumeを実行する必要があります。
 
-      なつめは辞書と学習情報を別々に管理しています。たとえば、
+    なつめは辞書と学習情報を別々に管理しています。たとえば、
 
-        /usr/local/share/natume/ipadic.dat  データ
-        /usr/local/share/natume/ipadic.idx  インデックス
-        ~/.natume/ipadic.sta                学習情報 
+      /usr/local/share/natume/ipadic.dat  データ
+      /usr/local/share/natume/ipadic.idx  インデックス
+      ~/.natume/ipadic.sta                学習情報 
 
-      辞書データと学習情報の不一致を防ぐために、
-      initnatumeは、古い辞書に関する学習情報をクリアします。
-      (このあたりは自動的に処理されるようにすべきなのですが....)
+    辞書データと学習情報の不一致を防ぐために、
+    initnatumeは、古い辞書に関する学習情報をクリアします。
+    (このあたりは自動的に処理されるようにすべきなのですが....)
 
 
   3.3 natumeserverを起動する
@@ -220,6 +230,17 @@ INSTALL
 
     $ kill <pid of natumeserver>
     # kill <pid of natumeserver> 管理者モードで起動した場合
+
+
+  3.5 クライアント同時接続数 (注: eclipsなど)
+
+    natumeserverは、同時に接続できるクライアントをデフォルトでは8に制限
+    しています。通常はこれで十分だと思いますが、この制限のために、
+    eclipseなどは起動時/終了時にフリーズすることがあります。
+    その場合、-nオプションで上限を引き上げてください。
+
+    $ /usr/local/sbin/natumeserver -n 100  (100クライアントまで許可)
+    $ /usr/local/sbin/natumeserver -n 0    (無制限)
 
 
 4. セキュリティ
@@ -281,34 +302,41 @@ INSTALL
     ほとんどのCannaクライアントは、そのままnatumeserverに接続できます。
     以下、確認できているものです。
 
-    5.1.1 emcws - http://emacs-21.ki.nu/
+    5.1.1 uim - http://code.google.com/p/uim-doc-ja/
 
-      いまこの文書もこれで書いているので大丈夫そう。
-      (註: その後、わたしはycに移行してしまいました)
+      FirefoxやChromeへの入力にはこれを使っています。
 
-    5.1.2 uim - http://anthy.sourceforge.jp/cgi-bin/hikija/hiki.cgi
+      しかし、最近のディストリビューションは、cannaサポートを無効のまま
+      パッケージを配布していることがあります。
+      その場合は、uimの再コンパイルが必要です。
+      cannaのクライアントライブラリは必要ありません。
 
-      Mozillaへの入力にはこれを使っているのでたぶん大丈夫。
 
-    5.1.3 kinput2
+    5.1.2 yc - http://www.ceres.dti.ne.jp/~knak/yc.html
 
-      ちょっとだけ使ってみた。とりあえず変換できたので大丈夫だと思う。
+      emacsへの入力にはこれを使っています。ycも更新されてemacs 23に対応。
+      ありがとうございます。
 
-    5.1.4 yc - http://www.ceres.dti.ne.jp/~knak/yc.html
-
-      大丈夫。
-
-      ycの場合には、わざわざnatumeserverを起動しなくても、
-      直接、バックエンドプロセスを起動する方法が使えます。
+      yc 4.0.13までは、わざわざnatumeserverを起動しなくても、
+      直接、バックエンドプロセスを起動する方法が使えました。
+      (現在は、ycのソースを変更する必要があります。)
 
         (setq yc-icanna-path "natume")
         (load-library "yc")
 
      セキュリティの点では、これが正しい戦略です。
 
+    以下のクライアントは、現在では入手が難しいので動作確認をしていません。
+
+    5.1.1 emcws - http://emacs-21.ki.nu/
+
+
+    5.1.3 kinput2
+
+
     5.1.5 Tamago 4+Canna patch - http://cgi18.plala.or.jp/~nyy/canna/
 
-      大丈夫そう。残念ながら、豊富な辞書関連の機能は使えません。
+      残念ながら、豊富な辞書関連の機能は使えません。
 
 
   5.2 (たぶん)動作しないクライアント
