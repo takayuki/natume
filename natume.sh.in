@@ -1,7 +1,7 @@
 #! /bin/sh
 #
 #  Natume -- an implementation of Kana-Kanji conversion in Haskell
-#  Copyright (C) 2006-2011 Takayuki Usui
+#  Copyright (C) 2006-2012 Takayuki Usui
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
