@@ -18,7 +18,7 @@
  --}
 module Main where
 
-import System
+import System.Environment
 import qualified Config
 import qualified Hinsi
 import qualified KForm

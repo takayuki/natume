@@ -28,8 +28,8 @@ module Lib (
     canna_request,canna_response,
   ) where
 
-import CString
-import CTypes
+import Foreign.C.String
+import Foreign.C.Types
 import Foreign
 
 castInt :: (Integral a, Integral b) => a -> b

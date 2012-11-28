@@ -29,7 +29,7 @@ module ScmToken (
     tokenize
   ) where
 
-import Char
+import Data.Char
 import Parser
 
 data Token = TokenLeftParen

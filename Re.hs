@@ -25,8 +25,8 @@ module Re (
     split,mblen,kata2hira,hira2kata,han2zen,zen2han
   ) where
 
-import Char
-import List
+import Data.Char
+import Data.List
 
 type Match a = ([[a]],[a]) -> [([[a]],[a])]
 

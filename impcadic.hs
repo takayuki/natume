@@ -19,8 +19,8 @@
 module Main where
 
 import System.IO
-import Char
-import System
+import Data.Char
+import System.Environment
 import qualified Config
 import Getopt
 import Re

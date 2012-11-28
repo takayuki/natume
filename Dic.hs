@@ -23,10 +23,10 @@ module Dic (
   ) where
 
 import Prelude hiding (id,last)
-import CTypes
-import CString
+import Foreign.C.Types
+import Foreign.C.String
 import Foreign
-import System
+import System.Environment
 import Compile (rensetu_tbl2)
 import qualified Config
 import qualified Lib

@@ -18,7 +18,7 @@
  --}
 module Main where
 
-import System
+import System.Environment
 import Canna
 import Getopt
 import qualified Config

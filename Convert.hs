@@ -21,7 +21,7 @@ module Convert (
   ) where
 
 import Prelude hiding (id,last)
-import qualified List
+import qualified Data.List
 import Con
 import Dic
 import Re
@@ -103,16 +103,16 @@ lookupDics :: [Dic] -> String -> IO [Mrph]
 lookupDics xs key =
   do hs <- lookupDics0 xs key 1
      return (mergeDics orderByUsage
-                       (map (List.sortBy orderByUsage) hs))
+                       (map (Data.List.sortBy orderByUsage) hs))
 
 group :: [[Mrph]] -> [Mrph]
-group xs = map (head.(List.sortBy orderByUsage))
-               (List.groupBy cmpByTable (mergeDics orderByTable xs))
+group xs = map (head.(Data.List.sortBy orderByUsage))
+               (Data.List.groupBy cmpByTable (mergeDics orderByTable xs))
 
 contractDics :: [Dic] -> String -> IO [Mrph]
 contractDics xs key =
   do hs <- lookupDics0 xs key 0
-     return (List.sortBy orderByUsage (group hs))
+     return (Data.List.sortBy orderByUsage (group hs))
 
 
 tails0 :: Int -> [[a]] -> [(Int,[[a]])]
@@ -180,7 +180,7 @@ choosePath con startmrph (x:xs) (bestcost,bestpath) =
                 (bestcost,bestpath)
 
 sortpath :: [Path] -> [Path]
-sortpath = List.sortBy cmp
+sortpath = Data.List.sortBy cmp
            where
            cmp x y = compare (x1+x2) (y1+y2) 
                      where
@@ -374,6 +374,6 @@ candidate dics mrph mode =
      return ((uniq2 dicwords) ++ modalwords)
   where
   ident (d,p) x = (dict x) == d && (point x) == p
-  uniq1 = List.nubBy (\(w1,_,_,_) (w2,_,_,_) -> w1 == w2)
-  uniq2 = List.nubBy (\(w1,_,_,s1) (w2,_,_,s2) -> w1 == w2 && s1 == s2)
+  uniq1 = Data.List.nubBy (\(w1,_,_,_) (w2,_,_,_) -> w1 == w2)
+  uniq2 = Data.List.nubBy (\(w1,_,_,s1) (w2,_,_,s2) -> w1 == w2 && s1 == s2)
 

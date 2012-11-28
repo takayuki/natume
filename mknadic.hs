@@ -19,9 +19,9 @@
 module Main where
 
 import Prelude hiding (id)
-import CString
-import Monad
-import System
+import Foreign.C.String
+import Control.Monad
+import System.Environment
 import qualified Config
 import qualified MkDic
 import Getopt

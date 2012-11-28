@@ -21,11 +21,11 @@ module Canna (
   ) where
 
 import Prelude hiding (id,init,min)
-import CTypes
-import CString
+import Foreign.C.Types
+import Foreign.C.String
 import Foreign
-import Monad
-import System
+import Control.Monad
+import System.Exit
 import Dic
 import Re
 import Session

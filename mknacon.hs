@@ -19,10 +19,10 @@
 module Main where
 
 import Prelude hiding (id)
-import CString
+import Foreign.C.String
 import Foreign
-import Monad
-import System
+import Control.Monad
+import System.Environment
 import qualified Config
 import qualified Connect
 import qualified Rensetu

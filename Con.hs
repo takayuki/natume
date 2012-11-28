@@ -21,8 +21,8 @@ module Con (
   ) where
 
 import Prelude hiding (id,last)
-import CString
-import CTypes
+import Foreign.C.String
+import Foreign.C.Types
 import Foreign
 import qualified Lib
 import Lib (castInt,cint,call)
