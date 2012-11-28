@@ -1,7 +1,7 @@
-PKGNAME=	natume-0.12
+PKGNAME=	natume-0.13
 PKGREVISION=	1
 CATEGORIES=	inputmethod
-DISTNAME=	natume-0.12
+DISTNAME=	natume-0.13
 DISTFILES=      ${DISTNAME}.tar.gz
 COMMENT=	an implementation of Kana-Kanji conversion in Haskell
 

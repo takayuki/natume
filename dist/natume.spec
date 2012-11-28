@@ -1,6 +1,6 @@
 Summary: an implementation of Kana-Kanji conversion in Haskell
 Name: natume
-Version: 0.12
+Version: 0.13
 Release: 1
 Source: natume-%{version}.tar.gz
 Group: System

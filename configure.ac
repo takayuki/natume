@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 AC_PREREQ(2.59)
-AC_INIT([Natume], [0.12], [strscr@users.sourceforge.jp], [natume])
+AC_INIT([Natume], [0.13], [takayuki.usui@gmail.com], [natume])
 
 AC_CONFIG_SRCDIR([natume.hs])
 AC_CONFIG_HEADER([config.h])

@@ -1,4 +1,4 @@
-なつめ -- Haskellによるかな漢字変換の実装 (version 0.12)
+なつめ -- Haskellによるかな漢字変換の実装 (version 0.13)
 README
 
 目次
@@ -101,7 +101,7 @@ INSTALLを参照してください。
 9. 連絡先
 
 臼井崇行
-strscr at users dot sourceforge dot jp
+takayuki.usui at gmail dot com
 
 10. リンク
 
