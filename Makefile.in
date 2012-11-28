@@ -55,8 +55,8 @@ h98safe: h98safe.o
 natumeserver: natumeserver.o libna.a
 	$(CC) -O2 -Wall -o natumeserver natumeserver.o $(LDFLAGS) $(LIBS)
 
-libna.a: array.o canna.o connect.o da.o dic.o sig.o
-	$(AR) rcs libna.a array.o canna.o connect.o da.o dic.o sig.o
+libna.a: array.o canna.o connect.o da.o dic.o sig.o socketlist.o
+	$(AR) rcs libna.a array.o canna.o connect.o da.o dic.o sig.o socketlist.o
 
 dics:
 	./mknacon -I $(IPADIC)
@@ -104,3 +104,4 @@ dic.o: dic.c config.h dic.h array.h da.h
 h98safe.o: h98safe.c
 natumeserver.o: natumeserver.c natumeserver.h canna.h sig.h
 sig.o: sig.h
+socketlist.o: socketlist.h

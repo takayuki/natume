@@ -26,7 +26,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <pwd.h>
-#include <arpa/inet.h>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
@@ -34,19 +34,20 @@
 #include <sys/wait.h>
 #include "canna.h"
 #include "sig.h"
+#include "socketlist.h"
 #include "natumeserver.h"
 
 #define SOCKDIR    "/tmp/.iroha_unix"
 #define SOCKPATH   "/tmp/.iroha_unix/IROHA"
 static char* natumepath = NATUMEPATH;
 static char* sockpath = SOCKPATH;
-static int sock[2];
+static struct socketlist sock;
 static int inet;
+static int inet6;
 #ifdef sun
 #undef sun
 #endif
 static struct sockaddr_un sun;
-static struct sockaddr_in sin;
 static int chldnum;
 static int chldmax = 8;
 static int debug;
@@ -58,18 +59,17 @@ version(void)
   exit(0);
 }
 
-extern char** environ;
 void
 help(void)
 {
-  fprintf(stderr,"natumeserver [-dihv] [-n num] [-s path] [-e exec]\n");
+  fprintf(stderr,"natumeserver [-46dihv] [-n num] [-s path] [-e exec]\n");
   exit(0);
 }
 
 void
 terminate(int sig)
 {
-  close(sock[0]);
+  socketlist_free(&sock);
   unlink(sun.sun_path);
   exit(0);
 }
@@ -86,13 +86,12 @@ collect(int sig)
 }
 
 int
-server_init(void)
+listen_unix(struct addrinfo* ai)
 {
-  int root;
+  int root = 0;
+  int s;
   struct stat st;
-  int s,opt;
 
-  root = 0;
   if (getuid() == 0) root = 1;
   if (!strcmp(sockpath,SOCKPATH)) {
     if (stat(SOCKDIR,&st) == -1) {
@@ -107,48 +106,95 @@ server_init(void)
     }
     if (!(S_IFDIR & st.st_mode)) return -1;
   }
-  s = socket(PF_UNIX,SOCK_STREAM,0);
+  s = socket(AF_UNIX,SOCK_STREAM,0);
   if (s == -1) {
     perror("socket"); return -1;
   }
   strcpy(sun.sun_path,sockpath);
   sun.sun_family = AF_UNIX;
   if (bind(s,(struct sockaddr*)&sun,sizeof(sun)) == -1) {
-    perror("bind"); return -1;
+    perror("bind"); goto err;
   }
   if (listen(s,5) == -1) {
-    perror("listen"); return -1;
+    perror("listen"); goto err;;
   }
   if (root) {
-    if (chmod(sockpath,0777) == -1) { perror("chown"); return -1; }
+    if (chmod(sockpath,0777) == -1) { perror("chown"); goto err; }
   } else {
-    if (chmod(sockpath,0700) == -1) { perror("chown"); return -1; }
+    if (chmod(sockpath,0700) == -1) { perror("chown"); goto err; }
   }
-  sock[0] = s;
+  socketlist_register(&sock,s,ai);
+  return s;
+ err:
+  close(s);
+  return -1;
+}
 
-  if (inet == 1) {
-    s = socket(PF_INET,SOCK_STREAM,0);
-    if (s == -1) {
-      perror("socket"); return -1;
-    }
-    opt = 1;
-    if (setsockopt(s,SOL_SOCKET,SO_REUSEADDR,&opt,sizeof opt) == -1) {
-      perror("setsockopt"); return -1;
-    }
-    sin.sin_family = AF_INET;
-    if (inet_aton("0.0.0.0",&sin.sin_addr) == 0) return -1;
-    sin.sin_port = htons(5680);
-    if (bind(s,(struct sockaddr *)&sin,sizeof(sin)) == -1) {
-      perror("bind"); return -1;
-    }
-    if (listen(s,5) == -1) {
-      perror("listen"); return -1;
-    }
-    sock[1] = s;
-  } else {
-    sock[1] = -1;
+int
+listen_inet(struct addrinfo* ai)
+{
+  int s,on = 1;
+
+  s = socket(ai->ai_family,ai->ai_socktype,ai->ai_protocol);
+  if (s == -1) {
+    perror("socket"); return -1;
   }
+  if (setsockopt(s,SOL_SOCKET,SO_REUSEADDR,&on,sizeof(on)) == -1) {
+    perror("setsockopt"); goto err;
+  }
+  if (ai->ai_family == AF_INET6) {
+    if (setsockopt(s,IPPROTO_IPV6, IPV6_V6ONLY,&on,sizeof(on)) == -1) {
+      perror("setsockopt"); goto err;
+    }
+  }
+  if (bind(s,(struct sockaddr *)ai->ai_addr,ai->ai_addrlen) == -1) {
+    perror("bind"); goto err;
+  }
+  if (listen(s,5) == -1) {
+    perror("listen");  goto err;
+  }
+  socketlist_register(&sock,s,ai);
   return 0;
+ err:
+  close(s);
+  return -1;
+}
+
+int
+server_init(void)
+{
+  struct addrinfo hints;
+  struct addrinfo *rs;
+  struct addrinfo *r;
+  int res;
+
+  memset(&hints,0,sizeof(hints));
+  hints.ai_family = AF_UNIX;
+  hints.ai_socktype = SOCK_STREAM;
+  if (listen_unix(&hints) < 0)
+    return -1;
+  if (!inet && !inet6)
+    return 0;
+  memset(&hints,0,sizeof(hints));
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_protocol = IPPROTO_TCP;
+  hints.ai_flags = (AI_PASSIVE | AI_NUMERICSERV);
+  res = getaddrinfo(0,"5680",&hints,&rs);
+  if (res < 0) {
+    fprintf(stderr,"getaddrinfo: %s\n",gai_strerror(res)); goto err;
+  }
+  for (r = rs; r != 0; r = r->ai_next) {
+    if (inet && r->ai_family == AF_INET)
+      listen_inet(r);
+    else if (inet6 && r->ai_family == AF_INET6)
+      listen_inet(r);
+  }
+  freeaddrinfo(rs);
+  return 0;
+ err:
+  freeaddrinfo(rs);
+  return -1;
 }
 
 char* keyval(char* key,char* val)
@@ -160,11 +206,11 @@ char* keyval(char* key,char* val)
 }
 
 int
-child(int s,int t,int argc,char** argv,char** env)
+child(int s,struct addrinfo* ai,int argc,char** argv,char** env)
 {
   int newargc,envc;
   char** newargv,** newenv;
-  int root;
+  int root = 0;
   int id;
   int major,minor;
   int size,offset;
@@ -172,7 +218,6 @@ child(int s,int t,int argc,char** argv,char** env)
   struct passwd* pw;
   struct stat st;
 
-  root = 0;
   if (getuid() == 0) root = 1;
   id = canna_init(0,s,s,0);
   if (id == -1)
@@ -190,14 +235,18 @@ child(int s,int t,int argc,char** argv,char** env)
     if (setuid(pw->pw_uid) == -1) { perror("setuid"); return -1; }
   }
   if (chdir(pw->pw_dir) == -1) return -1;
-  if (inet == 1 && t == 1) {
-    struct sockaddr_in peer;
-    socklen_t namelen = sizeof(peer);
-    if (getpeername(s,(struct sockaddr *)&peer,&namelen) == -1)
-      return -1;
-    snprintf(ac,sizeof(ac),".natume/allow/%s",inet_ntoa(peer.sin_addr));
-  } else {
+  if (ai->ai_family == AF_UNIX) {
     snprintf(ac,sizeof(ac),".natume/allow/%s","unix");
+  } else {
+    struct sockaddr_storage addr;
+    socklen_t addrlen = sizeof(addr);
+    if (getpeername(s,(struct sockaddr *)&addr,&addrlen) == -1)
+      return -1;
+    char peer[64];
+    if (getnameinfo((struct sockaddr *)&addr,addrlen,peer,sizeof(peer),
+                    0,0,NI_NUMERICHOST) != 0)
+      return -1;
+    snprintf(ac,sizeof(ac),".natume/allow/%s",peer);
   }
   if (stat(ac,&st) == -1) return -1;
   if (!(S_IFREG & st.st_mode)) return -1;
@@ -229,7 +278,7 @@ child(int s,int t,int argc,char** argv,char** env)
     newenv[envc] = 0;
   }
   dup2(s,0); dup2(s,1); close(s);
-  close(sock[0]); if (inet == 1 && t == 1) close(sock[1]);
+  socketlist_free(&sock);
   execve(natumepath,newargv,newenv);
   perror("execv");
   exit(1);
@@ -256,16 +305,18 @@ bg(void)
 int
 main(int argc,char** argv,char** env)
 {
-  int ch,s,t;
+  int ch,s;
   fd_set fdset;
   pid_t pid;
   int status;
 
-  while ((ch = getopt(argc,argv,"de:in:s:hv")) != -1) {
+  while ((ch = getopt(argc,argv,"46de:in:s:hv")) != -1) {
     switch (ch) {
     case 'e': natumepath = optarg; break;
     case 'd': debug = 1; break;
-    case 'i': inet = 1; break;
+    case 'i':
+    case '4': inet = 1; break;
+    case '6': inet6 = 1; break;
     case 'n': chldmax = atoi(optarg); break;
     case 's': sockpath = optarg; break;
     case 'v': version(); break;
@@ -276,6 +327,7 @@ main(int argc,char** argv,char** env)
   argc -= optind;
   argv += optind;
 
+  socketlist_init(&sock);
   if (server_init())
     return 1;
   if (!debug) {
@@ -295,9 +347,9 @@ main(int argc,char** argv,char** env)
     while (0 < chldmax && chldmax <= chldnum)
       sig_suspend(SIGCHLD);
     FD_ZERO(&fdset);
-    FD_SET(sock[0],&fdset); if (inet == 1) FD_SET(sock[1],&fdset);
+    socketlist_fdset(&sock,&fdset);
     sig_unblock(SIGCHLD);
-    status = select((sock[0]<sock[1]?sock[1]:sock[0])+1,&fdset,0,0,0);
+    status = select(sock.nfds,&fdset,0,0,0);
     sig_block(SIGCHLD);
     if (status == -1) {
       if (errno == EINTR) {
@@ -306,26 +358,18 @@ main(int argc,char** argv,char** env)
 	perror("select"); break;
       }
     }
-    t = 0;
-    if (FD_ISSET(sock[0],&fdset)) {
-      s = accept(sock[0],0,0);
-      if (s == -1) {
-	perror("accept"); break;
-      }
-    } else if (inet == 1 && FD_ISSET(sock[1],&fdset)) {
-      s = accept(sock[1],0,0);
-      if (s == -1) {
-	perror("accept"); break;
-      }
-      t = 1;
-    } else {
+    struct socket* r  = socketlist_accept(&sock,&fdset);
+    if (r == 0)
       continue;
+    s = accept(r->fd,0,0);
+    if (s == -1) {
+      perror("accept"); break;
     }
     if ((pid = fork()) == -1) {
       perror("fork"); break;
     }
     if (pid == 0) {
-      if (child(s,t,argc,argv,env) == -1)
+      if (child(s,&r->ai,argc,argv,env) == -1)
 	exit(1);
     }
     close(s);
