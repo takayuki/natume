@@ -114,8 +114,8 @@ fetch2 :: Dic -> Int -> Int -> IO [Mrph]
 fetch2 dic i num =
   let (id,yomi,word,table,cost,point,style,last) = dic in
     if i < num
-    then do y <- peekElemOff yomi i >>= peekCString
-            w <- peekElemOff word i >>= peekCString
+    then do y <- peekElemOff yomi i >>= peekCAString
+            w <- peekElemOff word i >>= peekCAString
             t <- peekElemOff table i >>= peekCInt
             c <- peekElemOff cost i >>= peekCInt
             p <- peekElemOff point i >>= peekCInt
@@ -140,7 +140,7 @@ fetch1 dic i num =
 dic_search :: Dic -> String -> Int -> IO [Mrph]
 dic_search dic key exact =
   let (id,_,_,_,_,_,_,_) = dic in
-    do ckey <- newCString key
+    do ckey <- newCAString key
        num <- call (Lib.dic_search (cint id) ckey (cint exact))
        ret <- fetch1 dic 0 num
        free ckey
@@ -153,8 +153,8 @@ dic_update dic pnt stl = let (id,_,_,_,_,_,_,_) = dic in
 dic_insert :: Dic -> String -> String -> Int -> Int -> Int -> IO Int
 dic_insert dic y w tbl cst stl =
   let (id,_,_,_,_,_,_,_) = dic in
-    do yomi <- newCString y
-       word <- newCString w
+    do yomi <- newCAString y
+       word <- newCAString w
        status <- call (Lib.dic_insert (cint id) yomi word (cint tbl)
                          (cint cst) (cint stl))
        free word

@@ -20,6 +20,7 @@ module Main where
 
 import Prelude hiding (id)
 import Foreign.C.String
+import Foreign.Marshal.Alloc
 import Control.Monad
 import System.Environment
 import qualified Config
@@ -42,10 +43,12 @@ readDics id start dir (x:xs) =
                (\prev (MkDic.MkLex _ w y _ _ table cost point) ->
                   if null y
                   then return prev
-                  else do yomi <- newCString (kata2hira y)
-                          word <- newCString w
+                  else do yomi <- newCAString (kata2hira y)
+                          word <- newCAString w
                           status <- call (dic_add (cint id) yomi word
                                       (cint table) (cint cost) (cint point))
+                          free yomi
+                          free word
                           if status == -1
                             then error "unable to register word in dictonary"
                             else return (point+1)

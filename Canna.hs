@@ -56,7 +56,7 @@ malloc2 w h = do p <- mallocArray h
                                     else return []
 
 poke2 :: (Ptr CString) -> [String] -> IO Int
-poke2 buf2 = foldM (\n x -> do newCString x >>= pokeElemOff buf2 n
+poke2 buf2 = foldM (\n x -> do newCAString x >>= pokeElemOff buf2 n
                                return (n+1))
                    (0 :: Int)
 
@@ -270,7 +270,7 @@ service s 0xf 0 =
     let (_,_,_,cxt,aux0,aux1,_,buf,buf2) = srv in
       do cont <- peekCInt cxt
          mode <- peekCInt aux0
-         input <- peekCString buf
+         input <- peekCAString buf
          if (length cxts) <= cont
            then do poke aux0 (-1)
                    response srv
@@ -476,7 +476,7 @@ cannaLoop path mode =
      if status == -1
        then error "Canna.canna_loop: unable to accept connection"
        else return ()
-     dat <- peekCString buf
+     dat <- peekCAString buf
      if take 2 dat == "3."
        then do status' <- establish srv 0
                if status' == -1
