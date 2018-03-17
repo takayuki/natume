@@ -22,6 +22,8 @@ module Parser (
     zero,one,plus,orelse,many,some
   ) where
 
+import Control.Monad (liftM,ap)
+
 data Parser a b = MkParser ([a] -> [(b,[a])])
 
 applyParser :: Parser a b -> ([a] -> [(b,[a])])
@@ -34,6 +36,13 @@ instance Monad (Parser a) where
   p >>= q = MkParser f
             where f s = [(t2,r2) | (t1,r1) <- applyParser p s,
                                    (t2,r2) <- applyParser (q t1) r1]
+
+instance Applicative (Parser a) where
+    pure = return
+    (<*>) = ap
+
+instance Functor (Parser a) where
+    fmap = liftM
 
 zero :: Parser a b
 zero = MkParser f where f _ = []

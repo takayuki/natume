@@ -468,7 +468,8 @@ request_type12(int id,int major,int minor,int* cxt,
   p = (uint16_t*)req.data;
   for (i = 0; i < (size / 2); i++) {
     init += 2; last -= 2;
-    if (*p == 0) break; p++;
+    if (*p == 0) break;
+    p++;
   }
   if (*p != 0) return -1;
   sub = narrow(0,0,(uint16_t*)req.data,init/2);

@@ -38,7 +38,7 @@ typedef struct {
   int16_t count:12,style:4;
   int16_t reserve;
   int32_t mtime;
-} dic_stat __attribute__ ((packed));
+} __attribute__ ((packed)) dic_stat;
 
 typedef struct {
   uint16_t len;
